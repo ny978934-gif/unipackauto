@@ -1,0 +1,101 @@
+import { NavLink, Outlet } from "react-router-dom";
+import "./AdminLayout.css";
+
+const AdminLayout = () => {
+  return (
+    <div className="admin-layout">
+
+      {/* Sidebar */}
+      <aside className="admin-sidebar">
+
+        <div className="admin-logo">
+          <h2>UNIPACK</h2>
+          <span>ADMIN PANEL</span>
+        </div>
+
+        <nav className="admin-nav">
+
+          <NavLink
+            to="/admin"
+            end
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>📊</span>
+            Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/admin/categories"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>📁</span>
+            Categories
+          </NavLink>
+
+          <NavLink
+            to="/admin/subcategories"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>📂</span>
+            Sub Categories
+          </NavLink>
+
+          <NavLink
+            to="/admin/products"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>⚙️</span>
+            Products
+          </NavLink>
+
+        </nav>
+
+        <div className="admin-sidebar-bottom">
+          <NavLink to="/" className="back-website">
+            ← Back to Website
+          </NavLink>
+        </div>
+
+      </aside>
+
+
+      {/* Main Area */}
+      <main className="admin-main">
+
+        <header className="admin-header">
+
+          <div>
+            <h3>Admin Panel</h3>
+            <p>Manage your spare parts website</p>
+          </div>
+
+          <div className="admin-profile">
+            <div className="admin-avatar">N</div>
+
+            <div>
+              <strong>Admin</strong>
+              <small>Administrator</small>
+            </div>
+          </div>
+
+        </header>
+
+        <section className="admin-content">
+          <Outlet />
+        </section>
+
+      </main>
+
+    </div>
+  );
+};
+
+export default AdminLayout;

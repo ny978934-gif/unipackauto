@@ -1,0 +1,294 @@
+:root {
+  --ui-bg: #fbf9f4;
+  --ui-panel: #ffffff;
+  --ui-tan: #e3c89b;
+  --ui-tan-soft: #f7f1e5;
+  --ui-ink: #231f20;
+  --ui-muted: #7d7a75;
+  --ui-line: #ede8df;
+  --ui-radius: 12px;
+  --ui-shadow: 0 8px 24px rgba(35, 31, 32, 0.06);
+}
+
+body {
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+}
+
+body,
+body * {
+  font-family: var(--font-body) !important;
+}
+
+body .section,
+body .about-section,
+body .why-us,
+body .partners,
+body .testimonials-section,
+body .contact-section {
+  padding-block: clamp(64px, 8vw, 104px);
+  padding-inline: 0;
+}
+
+body .hero__container,
+body .about__container,
+body .why-us__container,
+body .partners__container,
+body .testimonials-container,
+body .contact__container {
+  width: min(100%, 1280px);
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 40px);
+}
+
+/* Keep every page aligned with the navbar's warm, editorial visual language. */
+body .hero,
+body .about-section,
+body .why-us,
+body .partners,
+body .testimonials-section,
+body .contact-section,
+body .sp-page,
+body .sp-sub-container,
+body .sp-detail {
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+}
+
+body .hero__title,
+body .about__title,
+body .why-us__title,
+body .partners__title,
+body .contact__title,
+body .testimonial-heading,
+body .sp-intro h1,
+body .sp-sub-header h2,
+body .sp-detail-info h1 {
+  color: var(--ui-ink);
+  letter-spacing: -0.03em;
+}
+
+body .hero__title-accent,
+body .section-kicker,
+body .products__link,
+body .sp-link-text {
+  color: #a8834d;
+}
+
+body .hero__badge,
+body .about__badge,
+body .partners__badge,
+body .contact__badge,
+body .testimonial-badge,
+body .sp-badge {
+  background: var(--ui-tan-soft);
+  border: 1px solid var(--ui-line);
+  color: #61523c;
+  border-radius: 999px;
+}
+
+body .hero__btn,
+body .contact__submit-btn,
+body .sp-cta {
+  border-radius: 10px;
+}
+
+body .hero__btn--primary,
+body .contact__submit-btn,
+body .sp-cta,
+body .sp-cat.active {
+  background: var(--ui-tan);
+  color: var(--ui-ink);
+}
+
+body .hero__btn--primary:hover,
+body .contact__submit-btn:hover,
+body .sp-cta:hover,
+body .sp-cat.active:hover {
+  background: #dbbe8e;
+  color: var(--ui-ink);
+}
+
+body .hero__btn--secondary {
+  border-color: var(--ui-line);
+  color: var(--ui-ink);
+}
+
+body .products__grid {
+  background: var(--ui-line);
+  border-color: var(--ui-line);
+  border-radius: var(--ui-radius);
+}
+
+body .products__card,
+body .about__card,
+body .why-us__card,
+body .partners__card,
+body .testimonial-card,
+body .contact__card,
+body .contact__form-card,
+body .sp-card,
+body .sp-note {
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-shadow);
+}
+
+body .products__card {
+  min-height: 220px;
+}
+
+body .about__card,
+body .why-us__card,
+body .partners__card,
+body .testimonial-card,
+body .contact__card,
+body .contact__form-card {
+  box-shadow: 0 5px 18px rgba(35, 31, 32, 0.045);
+}
+
+body .products__card:hover,
+body .about__card:hover,
+body .why-us__card:hover,
+body .partners__card:hover,
+body .testimonial-card:hover,
+body .sp-card:hover {
+  box-shadow: 0 14px 30px rgba(35, 31, 32, 0.1);
+}
+
+body .about__description,
+body .why-us__subtitle,
+body .why-us__card-description,
+body .partners__subtitle,
+body .contact__subtitle,
+body .testimonial-subtitle,
+body .testimonial-text,
+body .sp-intro p,
+body .sp-sub-header p,
+body .sp-desc {
+  color: var(--ui-muted);
+}
+
+body .about__card-icon,
+body .why-us__icon-box,
+body .partners__logo-box,
+body .contact__card-icon,
+body .hero__badge-icon,
+body .quote-icon {
+  background: var(--ui-tan-soft);
+  color: #a8834d;
+}
+
+body .sp-page,
+body .sp-sub-container,
+body .sp-detail {
+  font-family: var(--font-body);
+}
+
+body .sp-cat {
+  border-radius: 10px;
+  color: var(--ui-muted);
+}
+
+body .sp-cat:hover {
+  background: var(--ui-tan-soft);
+  color: var(--ui-ink);
+}
+
+body .sp-card-img,
+body .sp-detail-img {
+  background: #faf8f5;
+  border-color: var(--ui-line);
+}
+
+body .sp-card-body h3 {
+  color: var(--ui-ink);
+}
+
+body .sp-sub-header {
+  border-color: var(--ui-line);
+}
+
+body .sp-specs,
+body .sp-compat {
+  background: var(--ui-tan-soft);
+  border-color: var(--ui-line);
+}
+
+body .sp-thumbs button {
+  border-color: var(--ui-line);
+  border-radius: 10px;
+}
+
+body .sp-thumbs button.active,
+body .sp-thumbs button:hover {
+  border-color: #c09a67;
+  box-shadow: 0 0 0 2px var(--ui-tan-soft);
+}
+
+body .contact__field input,
+body .contact__field textarea,
+body .admin-card input,
+body .admin-card select,
+body .admin-card textarea {
+  border-color: var(--ui-line);
+  border-radius: 9px;
+  background: #fcfbf9;
+}
+
+body .contact__field input:focus,
+body .contact__field textarea:focus,
+body .admin-card input:focus,
+body .admin-card select:focus,
+body .admin-card textarea:focus {
+  border-color: #c09a67;
+  box-shadow: 0 0 0 3px rgba(227, 200, 155, 0.2);
+}
+
+body .admin-container {
+  max-width: 760px;
+  padding-block: clamp(32px, 6vw, 72px);
+}
+
+body .admin-card {
+  border-color: var(--ui-line);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-shadow);
+}
+
+body .admin-btn {
+  border-radius: 10px;
+  background: var(--ui-tan);
+}
+
+body .admin-btn:hover {
+  background: #dbbe8e;
+  color: var(--ui-ink);
+}
+
+body :focus-visible {
+  outline: 3px solid rgba(192, 154, 103, 0.4);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  body .hero__title,
+  body .about__title,
+  body .why-us__title,
+  body .partners__title,
+  body .contact__title,
+  body .testimonial-heading {
+    letter-spacing: -0.02em;
+  }
+
+  body .about__card,
+  body .why-us__card,
+  body .partners__card,
+  body .testimonial-card,
+  body .contact__card,
+  body .contact__form-card {
+    border-radius: 10px;
+  }
+}

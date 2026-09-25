@@ -1,0 +1,134 @@
+.subcategory-page {
+  min-height: 100vh;
+  background: #f7f8fb;
+  color: #172033;
+}
+
+.subcategory-hero,
+.products-hero {
+  min-height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(rgba(12, 25, 49, .78), rgba(12, 25, 49, .78)), url("/images/spare-banner.jpg") center/cover;
+}
+
+.subcategory-hero h1 {
+  max-width: 780px;
+  margin: 0 auto 18px;
+  padding: 0 18px;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.12;
+}
+
+.subcategory-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.subcategory-breadcrumb a,
+.products-breadcrumb a {
+  color: #f6bd3a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.subcategory-content {
+  max-width: 1180px;
+  margin: auto;
+  padding: 70px 24px 100px;
+}
+
+.subcategory-content > p {
+  padding: 18px;
+  text-align: center;
+  color: #667085;
+}
+
+.subcategory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.subcategory-card {
+  overflow: hidden;
+  color: #172033;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid #e7ebf2;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(23, 32, 51, .07);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.subcategory-card:hover,
+.subcategory-card:focus-visible {
+  transform: translateY(-7px);
+  box-shadow: 0 18px 38px rgba(23, 32, 51, .14);
+}
+
+.subcategory-image {
+  height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f1f4f8;
+}
+
+.subcategory-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform .35s ease;
+}
+
+.subcategory-card:hover img {
+  transform: scale(1.06);
+}
+
+.subcategory-title {
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.subcategory-title b {
+  margin-top: 7px;
+  color: #1d5fa7;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .subcategory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .subcategory-content {
+    padding: 44px 15px 70px;
+  }
+
+  .subcategory-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subcategory-image {
+    height: 230px;
+  }
+}

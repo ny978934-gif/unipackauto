@@ -1,0 +1,207 @@
+:root {
+  --footer-bg: #1c1815;
+  --footer-text: #b3ada7;
+  --footer-heading: #fcf9f2;
+  --footer-accent: #e2c799;
+  --footer-border: #2d2824;
+  --footer-icon-bg: #2d2a26;
+}
+
+.footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding-top: 64px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.footer__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 40px);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1fr 1.2fr;
+  gap: 40px;
+}
+
+/* Brand Section */
+.footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.footer__brand-icon {
+  width: 250px;
+  height: 80px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.footer__brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.footer__brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer__brand-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--footer-heading);
+  line-height: 1.1;
+}
+
+.footer__brand-sub {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #8c857e;
+  margin-top: 3px;
+}
+
+.footer__description {
+  color: var(--footer-text);
+  margin: 0 0 24px 0;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+.footer__social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--footer-icon-bg);
+  color: var(--footer-text);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.footer__social-btn:hover {
+  background-color: var(--footer-accent);
+  color: #1f1a17;
+}
+
+/* Headings & Lists */
+.footer__heading {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--footer-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+}
+
+.footer__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer__links li {
+  margin-bottom: 12px;
+}
+
+.footer__links a {
+  color: var(--footer-text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer__links a:hover {
+  color: var(--footer-accent);
+}
+
+.footer__link-download a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--footer-text);
+  margin-top: 4px;
+}
+
+/* Contact Info Section */
+.footer__contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.footer__contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.footer__contact-icon {
+  color: var(--footer-text);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.footer__contact-item span,
+.footer__contact-item a {
+  color: var(--footer-text);
+  text-decoration: none;
+  line-height: 1.5;
+}
+
+.footer__contact-item a:hover {
+  color: var(--footer-accent);
+}
+
+/* Copyright Bottom Bar */
+.footer__bottom {
+  margin-top: 48px;
+  border-top: 1px solid var(--footer-border);
+  padding: 24px 0;
+}
+
+.footer__bottom .footer__container {
+  display: block;
+}
+
+.footer__copyright {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #706a64;
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 1024px) {
+  .footer__container {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer__container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  
+  .footer {
+    padding-top: 40px;
+  }
+
+  .footer__bottom {
+    margin-top: 32px;
+  }
+}

@@ -1,0 +1,396 @@
+/* ============================================
+   Partners Section — Unipackauto India
+   Dark Cream Theme · Full Color Logos
+   ============================================ */
+
+:root {
+  --p-cream-dark:    #4a3f2f;
+  --p-cream-darker:  #2a231a;
+  --p-cream-mid:     #8a7a63;
+  --p-cream-soft:    #d4c4a8;
+  --p-cream-light:   #f5efe4;
+  --p-cream-lighter: #faf6ee;
+  --p-border:        rgba(74, 63, 47, 0.12);
+  --p-text:          #2a231a;
+  --p-text-muted:    #6b5f4e;
+}
+
+/* --------------------------------------------
+   Section Wrapper
+   -------------------------------------------- */
+
+.partners {
+  position: relative;
+  padding: 100px 0;
+  background: linear-gradient(180deg, #f5efe4 0%, #faf6ee 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
+  color: var(--p-text);
+  overflow: hidden;
+}
+
+.partners::before {
+  content: '';
+  position: absolute;
+  top: -180px;
+  left: -180px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(
+    circle,
+    rgba(138, 122, 99, 0.14) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ambientFloat 14s ease-in-out infinite;
+}
+
+.partners::after {
+  content: '';
+  position: absolute;
+  bottom: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    circle,
+    rgba(74, 63, 47, 0.09) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ambientFloat 16s ease-in-out infinite reverse;
+}
+
+@keyframes ambientFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(30px, -20px) scale(1.08); }
+}
+
+.partners__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------------------------
+   Header
+   -------------------------------------------- */
+
+.partners__header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 60px;
+}
+
+.partners__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: rgba(74, 63, 47, 0.08);
+  color: var(--p-cream-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(74, 63, 47, 0.15);
+  animation:
+    badgeGlow 3.2s ease-in-out infinite,
+    fadeSlideUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.partners__badge svg {
+  transition: transform 0.4s ease;
+}
+
+.partners__badge:hover svg {
+  transform: rotate(-12deg) scale(1.15);
+}
+
+@keyframes badgeGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 63, 47, 0); }
+  50%      { box-shadow: 0 0 22px -6px rgba(74, 63, 47, 0.35); }
+}
+
+.partners__title {
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.5px;
+  color: var(--p-cream-darker);
+  margin: 0 0 16px;
+  animation: fadeSlideUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.12s both;
+}
+
+.partners__subtitle {
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--p-text-muted);
+  margin: 0;
+  animation: fadeSlideUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.22s both;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------
+   Partners Grid
+   -------------------------------------------- */
+
+.partners__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 20px;
+}
+
+/* --------------------------------------------
+   Partner Card
+   -------------------------------------------- */
+
+.partners__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 38px 24px 30px;
+  /* Warm cream card so colored logos pop */
+  background: linear-gradient(180deg, #ffffff 0%, #fdfaf4 100%);
+  border-radius: 20px;
+  border: 1px solid var(--p-border);
+  box-shadow:
+    0 14px 35px -22px rgba(74, 63, 47, 0.25),
+    0 4px 12px -8px rgba(74, 63, 47, 0.1);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s ease;
+  animation: cardEnter 0.85s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.partners__card:nth-child(1) { animation-delay: 0.30s; }
+.partners__card:nth-child(2) { animation-delay: 0.42s; }
+.partners__card:nth-child(3) { animation-delay: 0.54s; }
+.partners__card:nth-child(4) { animation-delay: 0.66s; }
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(34px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Top accent bar on hover */
+.partners__card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3d3327 0%, #8a7a63 60%, #d4c4a8 100%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Soft warm glow behind logo */
+.partners__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(212, 196, 168, 0.22) 0%,
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.partners__card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(74, 63, 47, 0.25);
+  box-shadow:
+    0 28px 55px -22px rgba(74, 63, 47, 0.35),
+    0 12px 24px -12px rgba(74, 63, 47, 0.18);
+}
+
+.partners__card:hover::before { transform: scaleX(1); }
+.partners__card:hover::after  { opacity: 1; }
+
+/* --------------------------------------------
+   Logo Box — COLORED BY DEFAULT
+   -------------------------------------------- */
+
+.partners__logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100px;
+  padding: 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.partners__logo {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  /* Full color — no grayscale filter */
+  filter: none;
+  opacity: 1;
+  transition:
+    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Slight drop shadow so bright logos don't blend into white */
+  filter: drop-shadow(0 4px 10px rgba(74, 63, 47, 0.08));
+}
+
+.partners__card:hover .partners__logo {
+  /* Slight brightness + saturation boost on hover */
+  filter:
+    drop-shadow(0 8px 18px rgba(74, 63, 47, 0.18))
+    brightness(1.05)
+    saturate(1.15);
+  transform: scale(1.1);
+}
+
+/* --------------------------------------------
+   Partner Name
+   -------------------------------------------- */
+
+.partners__name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--p-text);
+  text-align: center;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.partners__card:hover .partners__name {
+  color: var(--p-cream-dark);
+  letter-spacing: 0.8px;
+}
+
+.partners__name::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 22px;
+  height: 2px;
+  background: var(--p-cream-dark);
+  border-radius: 2px;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.partners__card:hover .partners__name::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* --------------------------------------------
+   Responsive Breakpoints
+   -------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .partners__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .partners { padding: 80px 0; }
+  .partners__header { margin-bottom: 48px; }
+  .partners__subtitle { font-size: 0.96rem; }
+
+  .partners__card {
+    padding: 32px 20px 26px;
+    border-radius: 18px;
+    gap: 16px;
+  }
+
+  .partners__logo-box { height: 84px; }
+  .partners__name { font-size: 0.8rem; }
+}
+
+@media (max-width: 520px) {
+  .partners { padding: 60px 0; }
+  .partners__container { padding: 0 16px; }
+
+  .partners__badge {
+    font-size: 0.7rem;
+    padding: 6px 16px;
+    letter-spacing: 1.6px;
+  }
+
+  .partners__title { font-size: 1.65rem; }
+  .partners__subtitle { font-size: 0.9rem; }
+
+  .partners__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .partners__card {
+    padding: 26px 14px 22px;
+    gap: 14px;
+    border-radius: 16px;
+  }
+
+  .partners__logo-box { height: 68px; padding: 0 6px; }
+
+  .partners__name {
+    font-size: 0.72rem;
+    letter-spacing: 0.3px;
+  }
+
+  .partners__card:hover { transform: translateY(-4px); }
+}
+
+@media (max-width: 380px) {
+  .partners__grid { grid-template-columns: 1fr; }
+  .partners__logo-box { height: 80px; }
+}
+
+/* --------------------------------------------
+   Accessibility: Reduced motion
+   -------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .partners__card:hover,
+  .partners__logo,
+  .partners__name {
+    transform: none !important;
+  }
+}

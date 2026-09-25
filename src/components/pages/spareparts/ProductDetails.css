@@ -1,0 +1,291 @@
+.product-details-page {
+  min-height: 100vh;
+  background: #f7f8fb;
+  padding-bottom: 80px;
+  color: #172033;
+}
+
+/* BREADCRUMB */
+
+.product-breadcrumb {
+  max-width: 1200px;
+  margin: auto;
+  padding: 30px 25px;
+
+  display: flex;
+  gap: 10px;
+
+  font-size: 13px;
+  color: #888;
+}
+
+.product-breadcrumb a {
+  color: #1d5fa7;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* MAIN */
+
+.product-main {
+  max-width: 1200px;
+  margin: 20px auto 60px;
+
+  padding: 0 25px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+/* IMAGE */
+
+.product-image-box {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  height: 540px;
+  box-shadow: 0 14px 36px rgba(23, 32, 51, .08);
+}
+
+.product-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 26px;
+}
+
+/* INFO */
+
+.product-info {
+  padding: 25px 0;
+}
+
+.product-label {
+  color: #1d5fa7;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.product-info h1 {
+  font-size: clamp(2.1rem, 4vw, 3.4rem);
+  line-height: 1.15;
+  margin: 15px 0;
+  color: #172033;
+}
+
+.part-code {
+  color: #777;
+  font-size: 14px;
+}
+
+.part-code strong {
+  margin-left: 8px;
+  color: #1d5fa7;
+}
+
+.product-price {
+  font-size: 34px;
+  font-weight: 700;
+  color: #1d5fa7;
+  margin: 25px 0 10px;
+}
+
+.stock {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.available {
+  background: #e5f7ea;
+  color: #19863d;
+}
+
+.unavailable {
+  background: #ffe7e7;
+  color: #c22;
+}
+
+.product-description {
+  color: #666;
+  line-height: 1.8;
+  margin: 25px 0;
+}
+
+/* ORDER */
+
+.order-btn {
+  display: inline-block;
+  background: #1d5fa7;
+  color: white;
+  border: none;
+
+  padding: 15px 28px;
+
+  border-radius: 9px;
+  text-decoration: none;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.order-btn:hover {
+  background: #154a82;
+  transform: translateY(-2px);
+}
+
+/* EXTRA */
+
+.product-extra {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 25px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.details-box {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 12px 32px rgba(23, 32, 51, .06);
+}
+
+.details-box h2 {
+  margin: 0 0 20px;
+  font-size: 20px;
+}
+
+/* SPEC */
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 13px 0;
+
+  border-bottom: 1px solid #eee;
+
+  font-size: 14px;
+}
+
+.spec-row span {
+  color: #777;
+}
+
+.spec-row strong {
+  color: #333;
+}
+
+/* MACHINE */
+
+.machine-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.machine-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  color: #555;
+}
+
+/* BACK */
+
+.back-products {
+  max-width: 1200px;
+  margin: 30px auto 0;
+  padding: 0 25px;
+}
+
+.back-products a {
+  color: #1d5fa7;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* NOT FOUND */
+
+.product-not-found {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f7f8fb;
+}
+
+.product-not-found a {
+  color: #1d5fa7;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 800px) {
+
+  .product-main {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .product-image-box {
+    height: 400px;
+  }
+
+  .product-info h1 {
+    font-size: 34px;
+  }
+
+  .product-extra {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 500px) {
+
+  .product-breadcrumb {
+    flex-wrap: wrap;
+    padding: 20px 15px;
+  }
+
+  .product-main {
+    padding: 0 15px;
+  }
+
+  .product-image-box {
+    height: 320px;
+  }
+
+  .product-info h1 {
+    font-size: 29px;
+  }
+
+  .product-price {
+    font-size: 28px;
+  }
+
+  .product-extra {
+    padding: 0 15px;
+  }
+
+  .details-box {
+    padding: 20px;
+  }
+
+}
