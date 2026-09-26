@@ -5,12 +5,15 @@ import "./SubCategory.css";
 
 const fallbackImage = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80";
 
-// Localhost URL ko Render backend URL se badalne ke liye helper function
+// Localhost URL ko Cloudinary URL me convert karne ke liye helper
 const getImageUrl = (imageSrc) => {
   if (!imageSrc) return fallbackImage;
+  
   if (imageSrc.includes("localhost:5000")) {
-    return imageSrc.replace("http://localhost:5000", API);
+    const filename = imageSrc.split("/").pop(); // File ka naam (e.g. image.png)
+    return `https://res.cloudinary.com/dfrujlit2/image/upload/${filename}`;
   }
+  
   return imageSrc;
 };
 
