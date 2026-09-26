@@ -5,6 +5,15 @@ import "./SubSubCategory.css";
 
 const fallbackImage = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80";
 
+// Localhost URL ko dynamic Render backend API URL se replace karne ke liye helper
+const getImageUrl = (imageSrc) => {
+  if (!imageSrc) return fallbackImage;
+  if (imageSrc.includes("localhost:5000")) {
+    return imageSrc.replace("http://localhost:5000", API);
+  }
+  return imageSrc;
+};
+
 const newestFirst = (items = []) =>
   [...items].sort((first, second) => {
     const firstDate = first.createdAt ? new Date(first.createdAt).getTime() : 0;
@@ -35,14 +44,43 @@ export default function SubSubCategory() {
 
   return (
     <div className="subsubcategory-page">
-      <section className="subsubcategory-hero"><div><span>SPARE PARTS CATALOGUE</span><h1>{data?.subCategory?.name || "Sub-subcategories"}</h1><nav className="subsubcategory-breadcrumb"><Link to="/">Home</Link><b>/</b><Link to="/spare-parts">Spare Parts</Link><b>/</b><Link to={`/spare-parts/${categorySlug}`}>{data?.category?.name || categorySlug}</Link><b>/</b><strong>{data?.subCategory?.name || subCategorySlug}</strong></nav></div></section>
+      <section className="subsubcategory-hero">
+        <div>
+          <span>SPARE PARTS CATALOGUE</span>
+          <h1>{data?.subCategory?.name || "Sub-subcategories"}</h1>
+          <nav className="subsubcategory-breadcrumb">
+            <Link to="/">Home</Link><b>/</b>
+            <Link to="/spare-parts">Spare Parts</Link><b>/</b>
+            <Link to={`/spare-parts/${categorySlug}`}>{data?.category?.name || categorySlug}</Link><b>/</b>
+            <strong>{data?.subCategory?.name || subCategorySlug}</strong>
+          </nav>
+        </div>
+      </section>
       <section className="subsubcategory-content">
         {state === "loading" && <p className="subsubcategory-message">Loading sub-subcategories...</p>}
         {state === "error" && <p className="subsubcategory-message">Unable to load this subcategory.</p>}
-        {state === "ready" && data.subSubCategories.length === 0 && <p className="subsubcategory-message">No sub-subcategories available.</p>}
-        <div className="subsubcategory-grid">{data?.subSubCategories.map((item) => <Link className="subsubcategory-card" key={item._id} to={`/spare-parts/${categorySlug}/${subCategorySlug}/${item.slug}`} aria-label={`Open products in ${item.name}`}><div className="subsubcategory-image"><img src={item.image || fallbackImage} alt={item.name} loading="lazy" /></div><h2>{item.name}</h2><span className="subsubcategory-card-link">View products →</span></Link>)}</div>
+        {state === "ready" && data?.subSubCategories?.length === 0 && <p className="subsubcategory-message">No sub-subcategories available.</p>}
+        
+        <div className="subsubcategory-grid">
+          {data?.subSubCategories?.map((item) => (
+            <Link className="subsubcategory-card" key={item._id} to={`/spare-parts/${categorySlug}/${subCategorySlug}/${item.slug}`} aria-label={`Open products in ${item.name}`}>
+              <div className="subsubcategory-image">
+                <img 
+                  src={getImageUrl(item.image)} 
+                  alt={item.name} 
+                  loading="lazy" 
+                  onError={(e) => { e.target.src = fallbackImage; }}
+                />
+              </div>
+              <h2>{item.name}</h2>
+              <span className="subsubcategory-card-link">View products →</span>
+            </Link>
+          ))}
+        </div>
+        
         <Link className="subsubcategory-back" to={`/spare-parts/${categorySlug}`}>← Back to subcategories</Link>
       </section>
     </div>
   );
 }
+
