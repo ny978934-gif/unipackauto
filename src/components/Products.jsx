@@ -22,18 +22,10 @@ export default function Products() {
     return () => controller.abort();
   }, []);
 
-  // Build the href for each product based on how deep its hierarchy goes
   const buildHref = (product) => {
-    const cat    = product.category;
-    const sub    = product.subCategory;
-    const subSub = product.subSubCategory;
-    if (cat?.slug && sub?.slug && subSub?.slug)
-      return `/products/${cat.slug}/${sub.slug}/${subSub.slug}/${product.slug}`;
-    if (cat?.slug && sub?.slug)
-      return `/products/${cat.slug}/${sub.slug}`;
-    if (cat?.slug)
-      return `/products/${cat.slug}`;
-    return "/products";
+    return product.category?.slug
+      ? `/products/${product.category.slug}/${product.slug}`
+      : "/products";
   };
 
   return (

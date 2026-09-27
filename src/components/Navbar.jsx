@@ -112,7 +112,7 @@ export default function Navbar() {
           </div>
           <div className="top-info-right">
             <a
-              href="https://wa.me/919785377675"
+              href="https://wa.me/919215521314"
               target="_blank"
               rel="noreferrer"
               className="top-info-item wa-link"

@@ -24,7 +24,6 @@ body .section,
 body .about-section,
 body .why-us,
 body .partners,
-body .testimonials-section,
 body .contact-section {
   padding-block: clamp(64px, 8vw, 104px);
   padding-inline: 0;
@@ -34,7 +33,6 @@ body .hero__container,
 body .about__container,
 body .why-us__container,
 body .partners__container,
-body .testimonials-container,
 body .contact__container {
   width: min(100%, 1280px);
   max-width: 1280px;
@@ -47,7 +45,6 @@ body .hero,
 body .about-section,
 body .why-us,
 body .partners,
-body .testimonials-section,
 body .contact-section,
 body .sp-page,
 body .sp-sub-container,
@@ -61,7 +58,6 @@ body .about__title,
 body .why-us__title,
 body .partners__title,
 body .contact__title,
-body .testimonial-heading,
 body .sp-intro h1,
 body .sp-sub-header h2,
 body .sp-detail-info h1 {
@@ -80,7 +76,6 @@ body .hero__badge,
 body .about__badge,
 body .partners__badge,
 body .contact__badge,
-body .testimonial-badge,
 body .sp-badge {
   background: var(--ui-tan-soft);
   border: 1px solid var(--ui-line);
@@ -125,7 +120,6 @@ body .products__card,
 body .about__card,
 body .why-us__card,
 body .partners__card,
-body .testimonial-card,
 body .contact__card,
 body .contact__form-card,
 body .sp-card,
@@ -143,7 +137,6 @@ body .products__card {
 body .about__card,
 body .why-us__card,
 body .partners__card,
-body .testimonial-card,
 body .contact__card,
 body .contact__form-card {
   box-shadow: 0 5px 18px rgba(35, 31, 32, 0.045);
@@ -153,7 +146,6 @@ body .products__card:hover,
 body .about__card:hover,
 body .why-us__card:hover,
 body .partners__card:hover,
-body .testimonial-card:hover,
 body .sp-card:hover {
   box-shadow: 0 14px 30px rgba(35, 31, 32, 0.1);
 }
@@ -163,8 +155,6 @@ body .why-us__subtitle,
 body .why-us__card-description,
 body .partners__subtitle,
 body .contact__subtitle,
-body .testimonial-subtitle,
-body .testimonial-text,
 body .sp-intro p,
 body .sp-sub-header p,
 body .sp-desc {
@@ -278,15 +268,13 @@ body :focus-visible {
   body .about__title,
   body .why-us__title,
   body .partners__title,
-  body .contact__title,
-  body .testimonial-heading {
+  body .contact__title {
     letter-spacing: -0.02em;
   }
 
   body .about__card,
   body .why-us__card,
   body .partners__card,
-  body .testimonial-card,
   body .contact__card,
   body .contact__form-card {
     border-radius: 10px;

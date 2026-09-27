@@ -37,16 +37,6 @@ const AdminLayout = () => {
           </NavLink>
 
           <NavLink
-            to="/admin/subcategories"
-            className={({ isActive }) =>
-              isActive ? "admin-link active" : "admin-link"
-            }
-          >
-            <span>📂</span>
-            Sub Categories
-          </NavLink>
-
-          <NavLink
             to="/admin/products"
             className={({ isActive }) =>
               isActive ? "admin-link active" : "admin-link"
@@ -67,6 +57,16 @@ const AdminLayout = () => {
           </NavLink>
 
           <NavLink
+            to="/admin/inquiries"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>✉️</span>
+            Inquiries
+          </NavLink>
+
+          <NavLink
             to="/admin/document-uploader"
             className={({ isActive }) =>
               isActive ? "admin-link active" : "admin-link"
@@ -74,6 +74,16 @@ const AdminLayout = () => {
           >
             <span>📄</span>
             Document Uploader
+          </NavLink>
+
+          <NavLink
+            to="/admin/spare-parts-uploader"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>📊</span>
+            Spare Parts Import
           </NavLink>
 
         </nav>

@@ -3,10 +3,40 @@
   max-width: 860px;
 }
 
-/* ─── Legacy status banner (kept for backward compat) ───────────────────── */
-.document-status.loading { background: #f1e6f3; }
-.document-status.success { background: #e8f5ec; color: #216e39; }
-.document-status.error   { background: #fff0ef; color: #a12622; }
+.du-file-disabled {
+  opacity: 0.6;
+}
+
+.du-selected-file {
+  margin: 9px 0 0;
+  color: #4a1155;
+  font-size: 13px;
+}
+
+.du-import-help {
+  margin: 0 0 18px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.du-import-results {
+  margin-top: 25px;
+}
+
+.du-import-category-link {
+  padding: 14px 22px;
+  border-bottom: 1px solid #eee;
+  color: #555;
+  font-size: 14px;
+}
+
+.du-import-category-link a,
+.du-import-results td a {
+  color: #1d5fa7;
+  font-weight: 600;
+  text-decoration: none;
+}
 
 /* ─── Dropzone ───────────────────────────────────────────────────────────── */
 .document-dropzone {
@@ -162,97 +192,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* ─── Parsed product preview card ────────────────────────────────────────── */
-.du-preview-card {
-  max-width: 860px;
-  background: #fff;
-  border: 1px solid #d4edda;
-  border-left: 4px solid #28a745;
-  border-radius: 12px;
-  padding: 20px 24px;
-  margin-bottom: 24px;
-  animation: du-slide-in 0.3s ease;
-}
-
-@keyframes du-slide-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.du-preview-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.du-preview-badge {
-  background: #e8f5ec;
-  color: #216e39;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-}
-
-.du-preview-name {
-  margin: 0;
-  font-size: 17px;
-  color: #222;
-}
-
-.du-preview-fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px 20px;
-}
-
-.du-preview-field {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.du-preview-field--full {
-  grid-column: 1 / -1;
-}
-
-.du-preview-field > span {
-  font-size: 11px;
-  font-weight: 700;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.du-preview-field code {
-  font-size: 13px;
-}
-
-.du-preview-field strong {
-  color: #66116f;
-  font-size: 15px;
-}
-
-.du-preview-field em {
-  font-style: normal;
-  color: #444;
-  font-size: 14px;
-}
-
-.du-preview-field p {
-  margin: 0;
-  font-size: 13px;
-  color: #555;
-  line-height: 1.55;
-}
-
-/* ─── Recently imported table ────────────────────────────────────────────── */
-.du-imported-table {
-  margin-top: 8px;
-}
-
 /* ─── Toast stack ────────────────────────────────────────────────────────── */
 .du-toast-stack {
   position: fixed;
@@ -314,5 +253,4 @@
   .document-dropzone { min-height: 160px; padding: 20px; }
   .du-toast-stack    { bottom: 16px; right: 16px; left: 16px; }
   .du-toast          { min-width: unset; max-width: 100%; }
-  .du-preview-fields { grid-template-columns: 1fr; }
 }

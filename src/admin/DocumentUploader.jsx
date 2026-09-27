@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { API } from "../spareApi";
 import "./DocumentUploader.css";
@@ -21,69 +21,13 @@ function Toast({ toasts }) {
   );
 }
 
-// ── Extracted product preview card ────────────────────────────────────────────
-function ProductPreview({ product }) {
-  if (!product) return null;
-  return (
-    <div className="du-preview-card">
-      <div className="du-preview-header">
-        <span className="du-preview-badge">✓ Saved to database</span>
-        <h3 className="du-preview-name">{product.name}</h3>
-      </div>
-      <div className="du-preview-fields">
-        {product.partCode && (
-          <div className="du-preview-field">
-            <span>Item Code</span>
-            <code>{product.partCode}</code>
-          </div>
-        )}
-        {product.price > 0 && (
-          <div className="du-preview-field">
-            <span>Price</span>
-            <strong>₹{Number(product.price).toLocaleString("en-IN")}</strong>
-          </div>
-        )}
-        {product.category?.name && (
-          <div className="du-preview-field">
-            <span>Category</span>
-            <em>{product.category.name}</em>
-          </div>
-        )}
-        {product.subCategory?.name && (
-          <div className="du-preview-field">
-            <span>Subcategory</span>
-            <em>{product.subCategory.name}</em>
-          </div>
-        )}
-        {product.description && (
-          <div className="du-preview-field du-preview-field--full">
-            <span>Description (first 200 chars)</span>
-            <p>{product.description.slice(0, 200)}{product.description.length > 200 ? "…" : ""}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function DocumentUploader({ type = "machine", onUploadSuccess }) {
-  const [categories, setCategories]       = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [subSubcategories, setSubSubcategories] = useState([]);
-  const [categoryId, setCategoryId]       = useState("");
-  const [subCategoryId, setSubCategoryId] = useState("");
-  const [subSubCategoryId, setSubSubCategoryId] = useState("");
-
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState("");
+  const [loadingOptions, setLoadingOptions] = useState(true);
   const [file, setFile]           = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [loadingOptions, setLoadingOptions] = useState(true);
-
-  // Parsed product shown below the dropzone after a successful import
-  const [parsedProduct, setParsedProduct] = useState(null);
-
-  // Products added this session — shown in the "Recently imported" table
-  const [importedProducts, setImportedProducts] = useState([]);
 
   // Toast queue
   const [toasts, setToasts] = useState([]);
@@ -95,38 +39,22 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), duration);
   }, []);
 
-  // ── load dropdowns ─────────────────────────────────────────────────────────
   useEffect(() => {
     const controller = new AbortController();
-    (async () => {
-      try {
-        const [catRes, subRes, subSubRes] = await Promise.all([
-          fetch(`${API}/api/spare/categories?type=${type}`,    { signal: controller.signal }),
-          fetch(`${API}/api/subcategories?type=${type}`,       { signal: controller.signal }),
-          fetch(`${API}/api/sub-subcategories?type=${type}`,   { signal: controller.signal }),
-        ]);
-        if (!catRes.ok || !subRes.ok || !subSubRes.ok) throw new Error("Unable to load category options.");
-        const [catData, subData, subSubData] = await Promise.all([catRes.json(), subRes.json(), subSubRes.json()]);
-        setCategories(Array.isArray(catData) ? catData : []);
-        setSubcategories(Array.isArray(subData) ? subData : []);
-        setSubSubcategories(Array.isArray(subSubData) ? subSubData : []);
-      } catch (err) {
-        if (err.name !== "AbortError") pushToast(err.message, "error");
-      } finally {
+    fetch(`${API}/api/spare/categories?type=${type}`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load categories.");
+        return response.json();
+      })
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .catch((error) => {
+        if (error.name !== "AbortError") pushToast(error.message, "error");
+      })
+      .finally(() => {
         if (!controller.signal.aborted) setLoadingOptions(false);
-      }
-    })();
+      });
     return () => controller.abort();
   }, [type, pushToast]);
-
-  const visibleSubcategories = useMemo(
-    () => subcategories.filter((s) => (s.category?._id || s.category) === categoryId),
-    [subcategories, categoryId],
-  );
-  const visibleSubSubcategories = useMemo(
-    () => subSubcategories.filter((s) => (s.subCategory?._id || s.subCategory) === subCategoryId),
-    [subSubcategories, subCategoryId],
-  );
 
   // ── file validation ────────────────────────────────────────────────────────
   const validateFile = useCallback((f) => {
@@ -149,7 +77,6 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
     const err = validateFile(picked);
     if (err) { pushToast(err, "error"); return; }
     setFile(picked);
-    setParsedProduct(null);
   }, [validateFile, pushToast]);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
@@ -166,7 +93,10 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
   // ── submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file || !categoryId || !subCategoryId) return;
+    if (!file || !categoryId) {
+      pushToast("Choose a category and a PDF or DOCX file to upload.", "error");
+      return;
+    }
 
     setUploading(true);
     // loading toast — cleared explicitly on success/error below
@@ -177,8 +107,6 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
       const formData = new FormData();
       formData.append("document",        file);
       formData.append("categoryId",      categoryId);
-      formData.append("subCategoryId",   subCategoryId);
-      formData.append("subSubCategoryId", subSubCategoryId);
       formData.append("type",            type);
 
       const res = await fetch(`${API}/api/documents/upload-parse`, {
@@ -190,9 +118,6 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
 
       // ── instant UI update ──────────────────────────────────────────────
       const savedProduct = data.product;
-      setParsedProduct(savedProduct);
-      // prepend to local "recently imported" list
-      setImportedProducts((prev) => [savedProduct, ...prev]);
       // notify parent (e.g. Products2.jsx can refresh its table)
       onUploadSuccess?.(savedProduct);
 
@@ -203,8 +128,6 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
       // reset form
       setFile(null);
       setCategoryId("");
-      setSubCategoryId("");
-      setSubSubCategoryId("");
     } catch (err) {
       setToasts((prev) => prev.filter((t) => t.id !== loadingToastId));
       pushToast(err.message || "Failed to parse document. Please check file format.", "error");
@@ -229,58 +152,27 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
       <div className="page-title">
         <div>
           <h1>Document uploader</h1>
-          <p>Drop a PDF or DOCX — product fields are extracted and saved to the database instantly.</p>
+          <p>Upload a PDF or DOCX to extract product details and save them under a machine/category.</p>
         </div>
       </div>
 
       <form className="admin-form-card document-uploader-form" onSubmit={handleSubmit}>
-        <h2>Import product from document</h2>
-
-        {/* ── category selects ── */}
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="du-category">Main category *</label>
-            <select
-              id="du-category"
-              required
-              value={categoryId}
-              disabled={loadingOptions || uploading}
-              onChange={(e) => { setCategoryId(e.target.value); setSubCategoryId(""); setSubSubCategoryId(""); }}
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="du-subcategory">Subcategory *</label>
-            <select
-              id="du-subcategory"
-              required
-              value={subCategoryId}
-              disabled={!categoryId || loadingOptions || uploading}
-              onChange={(e) => { setSubCategoryId(e.target.value); setSubSubCategoryId(""); }}
-            >
-              <option value="">Select subcategory</option>
-              {visibleSubcategories.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
-            </select>
-          </div>
-        </div>
+        <h2>Upload document</h2>
 
         <div className="form-group">
-          <label htmlFor="du-subsubcategory">Sub-subcategory</label>
+          <label htmlFor="document-category">Main category (machine name) *</label>
           <select
-            id="du-subsubcategory"
-            value={subSubCategoryId}
-            disabled={!subCategoryId || loadingOptions || uploading}
-            onChange={(e) => setSubSubCategoryId(e.target.value)}
+            id="document-category"
+            required
+            value={categoryId}
+            disabled={loadingOptions || uploading}
+            onChange={(event) => setCategoryId(event.target.value)}
           >
-            <option value="">None</option>
-            {visibleSubSubcategories.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
+            <option value="">Select category</option>
+            {categories.map((category) => <option key={category._id} value={category._id}>{category.name}</option>)}
           </select>
         </div>
 
-        {/* ── dropzone ── */}
         <div {...getRootProps({ className: dropzoneClass })}>
           <input {...getInputProps()} />
 
@@ -313,7 +205,7 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
                   <button
                     type="button"
                     className="du-clear-btn"
-                    onClick={(e) => { e.stopPropagation(); setFile(null); setParsedProduct(null); }}
+                    onClick={(e) => { e.stopPropagation(); setFile(null); }}
                   >
                     Remove
                   </button>
@@ -329,12 +221,13 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
         <div className="du-fields-hint">
           <span>Fields extracted from the document:</span>
           <code>Name</code><code>Item Code</code><code>Price</code><code>Description</code>
+          <code>UOM</code>
         </div>
 
         <button
           className="primary-btn du-submit-btn"
           type="submit"
-          disabled={uploading || loadingOptions || !file || !categoryId || !subCategoryId}
+          disabled={uploading || loadingOptions || !file || !categoryId}
         >
           {uploading ? (
             <><span className="du-spinner" aria-hidden="true" /> Importing…</>
@@ -343,43 +236,6 @@ export default function DocumentUploader({ type = "machine", onUploadSuccess }) 
           )}
         </button>
       </form>
-
-      {/* ── parsed product preview ── */}
-      {parsedProduct && <ProductPreview product={parsedProduct} />}
-
-      {/* ── recently imported table ── */}
-      {importedProducts.length > 0 && (
-        <div className="admin-table-card du-imported-table">
-          <div className="table-header">
-            <h2>Imported this session</h2>
-            <span>{importedProducts.length}</span>
-          </div>
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Item code</th>
-                  <th>Price</th>
-                  <th>Category</th>
-                  <th>Subcategory</th>
-                </tr>
-              </thead>
-              <tbody>
-                {importedProducts.map((p) => (
-                  <tr key={p._id}>
-                    <td><strong>{p.name}</strong></td>
-                    <td><code>{p.partCode || "—"}</code></td>
-                    <td>{p.price > 0 ? `₹${Number(p.price).toLocaleString("en-IN")}` : "—"}</td>
-                    <td>{p.category?.name || "—"}</td>
-                    <td>{p.subCategory?.name || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

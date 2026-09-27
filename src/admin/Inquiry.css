@@ -1,0 +1,169 @@
+.inquiry-page-title {
+  align-items: center;
+}
+
+.inquiry-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.inquiry-summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 82px;
+  padding: 18px 22px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+}
+
+.inquiry-summary-card span {
+  color: #777;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.inquiry-summary-card strong {
+  color: #66116f;
+  font-size: 28px;
+}
+
+.inquiry-summary-new strong {
+  color: #c46d12;
+}
+
+.inquiry-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  color: #9f2525;
+  background: #fff0f0;
+  border: 1px solid #ffd9d9;
+  border-radius: 10px;
+}
+
+.inquiry-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
+  gap: 16px;
+  padding: 18px 22px 4px;
+}
+
+.inquiry-filters .form-group {
+  margin-bottom: 14px;
+}
+
+.inquiry-filters label {
+  display: block;
+  margin-bottom: 7px;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.inquiry-filters input,
+.inquiry-filters select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+}
+
+.inquiry-filters input:focus,
+.inquiry-filters select:focus {
+  border-color: #66116f;
+  outline: 2px solid #f1e6f3;
+}
+
+.inquiry-state {
+  margin: 0;
+  padding: 28px 22px;
+  color: #777;
+  text-align: center;
+}
+
+.inquiry-table {
+  min-width: 1000px;
+}
+
+.inquiry-date {
+  min-width: 150px;
+  white-space: nowrap;
+}
+
+.inquiry-company {
+  display: block;
+  margin-top: 5px;
+  color: #888;
+}
+
+.inquiry-contact a {
+  display: block;
+  margin-bottom: 5px;
+  color: #66116f;
+  text-decoration: none;
+}
+
+.inquiry-contact a:hover {
+  text-decoration: underline;
+}
+
+.inquiry-message {
+  min-width: 240px;
+  max-width: 380px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.inquiry-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.inquiry-status-new {
+  color: #9a570b;
+  background: #fff0d9;
+}
+
+.inquiry-status-contacted {
+  color: #225a94;
+  background: #e8f2ff;
+}
+
+.inquiry-status-closed {
+  color: #387348;
+  background: #e8f6eb;
+}
+
+@media (max-width: 650px) {
+  .inquiry-page-title {
+    align-items: flex-start;
+  }
+
+  .inquiry-summary,
+  .inquiry-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .inquiry-filters {
+    padding-inline: 16px;
+  }
+
+  .inquiry-error {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
