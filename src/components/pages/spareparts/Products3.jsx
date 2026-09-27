@@ -18,7 +18,7 @@ export default function Products() {
       .then((result) => { setData(result); setState("ready"); })
       .catch((error) => { if (error.name !== "AbortError") setState("error"); });
     return () => controller.abort();
-  }, [categorySlug, subCategorySlug]);
+  }, [categorySlug, subCategorySlug, subSubCategorySlug]);
 
   return (
     <div className="products-page">

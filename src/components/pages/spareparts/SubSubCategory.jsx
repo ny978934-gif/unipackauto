@@ -63,7 +63,6 @@ export default function SubSubCategory() {
       <section className="subsubcategory-content">
         {state === "loading" && <p className="subsubcategory-message">Loading sub-subcategories...</p>}
         {state === "error" && <p className="subsubcategory-message">Unable to load this subcategory.</p>}
-<<<<<<< HEAD
         {state === "ready" && data?.subSubCategories?.length === 0 && <p className="subsubcategory-message">No sub-subcategories available.</p>}
         
         <div className="subsubcategory-grid">
@@ -82,11 +81,6 @@ export default function SubSubCategory() {
             </Link>
           ))}
         </div>
-        
-=======
-        {state === "ready" && data.subSubCategories.length === 0 && <p className="subsubcategory-message">No sub-subcategories available.</p>}
-        <div className="subsubcategory-grid">{data?.subSubCategories.map((item) => <article className="subsubcategory-card" key={item._id}><div className="subsubcategory-image"><CategoryImageGallery images={item.images?.length ? item.images : [item.image]} fallbackImage={fallbackImage} alt={item.name} /></div><Link className="subsubcategory-card-title" to={`/spare-parts/${categorySlug}/${subCategorySlug}/${item.slug}`} aria-label={`Open products in ${item.name}`}><h2>{item.name}</h2><span className="subsubcategory-card-link">View products →</span></Link></article>)}</div>
->>>>>>> fd29cdc (Initial commit)
         <Link className="subsubcategory-back" to={`/spare-parts/${categorySlug}`}>← Back to subcategories</Link>
       </section>
     </div>
