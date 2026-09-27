@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { API } from "../../../spareApi";
+import CategoryImageGallery from "./CategoryImageGallery";
 import "./SubCategory.css";
 
 const fallbackImage = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80";
@@ -62,6 +63,7 @@ export default function SubCategory() {
         {state === "error" && <p>Category not found.</p>}
         {state === "ready" && data?.subCategories?.length === 0 && <p>No subcategories available.</p>}
         <div className="subcategory-grid">
+<<<<<<< HEAD
           {data?.subCategories?.map((subCategory) => (
             <Link key={subCategory._id} to={`/spare-parts/${categorySlug}/${subCategory.slug}`} className="subcategory-card" aria-label={`Open ${subCategory.name}`}>
               <div className="subcategory-image">
@@ -77,6 +79,13 @@ export default function SubCategory() {
                 <b>View subcategories →</b>
               </div>
             </Link>
+=======
+          {data?.subCategories.map((subCategory) => (
+            <article key={subCategory._id} className="subcategory-card">
+              <div className="subcategory-image"><CategoryImageGallery images={subCategory.images?.length ? subCategory.images : [subCategory.image]} fallbackImage={fallbackImage} alt={subCategory.name} /></div>
+              <Link to={`/spare-parts/${categorySlug}/${subCategory.slug}`} className="subcategory-title" aria-label={`Open ${subCategory.name}`}><span>{subCategory.name}</span><b>View subcategories →</b></Link>
+            </article>
+>>>>>>> fd29cdc (Initial commit)
           ))}
         </div>
       </section>

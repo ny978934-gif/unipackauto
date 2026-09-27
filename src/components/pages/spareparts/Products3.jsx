@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { API } from "../../../spareApi";
+import CloudinaryImage from "./CloudinaryImage";
 import "./Products3.css";
 
 const fallbackImage = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80";
@@ -27,7 +28,7 @@ export default function Products() {
         {state === "error" && <p>Sub-subcategory not found.</p>}
         {state === "ready" && data.products.length === 0 && <p>No products available.</p>}
         <div className="products-grid">
-          {data?.products.map((product) => <Link key={product._id} to={`/spare-parts/${categorySlug}/${subCategorySlug}/${subSubCategorySlug}/${product.slug}`} className="product-card"><div className="product-image"><img src={product.image || fallbackImage} alt={product.name} loading="lazy" /></div><div className="product-name">{product.name}</div></Link>)}
+          {data?.products.map((product) => <Link key={product._id} to={`/spare-parts/${categorySlug}/${subCategorySlug}/${subSubCategorySlug}/${product.slug}`} className="product-card"><div className="product-image"><CloudinaryImage src={product.image || product.images?.[0]} fallbackSrc={fallbackImage} alt={product.name} loading="lazy" /></div><div className="product-name">{product.name}</div></Link>)}
         </div>
       </section>
     </div>
