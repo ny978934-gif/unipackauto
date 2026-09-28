@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { API } from "../spareApi";
 import logo from "../assests/logo.jpeg";
@@ -10,6 +10,10 @@ export default function Navbar() {
   const [spareOpen, setSpareOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [spareCategories, setSpareCategories] = useState([]);
+  const desktopSpareRef = useRef(null);
+  const desktopSpareButtonRef = useRef(null);
+  const mobileSpareRef = useRef(null);
+  const mobileSpareButtonRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -29,6 +33,38 @@ export default function Navbar() {
 
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (!spareOpen) return undefined;
+
+    const closeOnOutsideClick = (event) => {
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        !desktopSpareRef.current?.contains(target) &&
+        !mobileSpareRef.current?.contains(target)
+      ) {
+        setSpareOpen(false);
+      }
+    };
+    const closeOnEscape = (event) => {
+      if (event.key !== "Escape") return;
+
+      setSpareOpen(false);
+      const activeElement = document.activeElement;
+      const trigger = mobileSpareRef.current?.contains(activeElement)
+        ? mobileSpareButtonRef.current
+        : desktopSpareButtonRef.current;
+      trigger?.focus();
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [spareOpen]);
 
   const closeMenus = () => {
     setOpen(false);
@@ -73,32 +109,34 @@ export default function Navbar() {
 
           {/* Desktop Nav Items */}
           <div className="navbar-menu-desktop">
-            <Link to="/#top" className="nav-link active">
+            <Link to="/#top" className="nav-link active" onClick={closeMenus}>
               Home
             </Link>
-            <Link to="/#about" className="nav-link">
+            <Link to="/#about" className="nav-link" onClick={closeMenus}>
               About Us
             </Link>
-            <Link to="/#products" className="nav-link">
+            <Link to="/#products" className="nav-link" onClick={closeMenus}>
               Products
             </Link>
 
             {/* Spare Parts Dropdown */}
             <div
-              className="dropdown-wrapper"
-              onMouseEnter={() => setSpareOpen(true)}
-              onMouseLeave={() => setSpareOpen(false)}
+              className={`dropdown-wrapper ${spareOpen ? "is-open" : ""}`}
+              ref={desktopSpareRef}
             >
               <button
                 type="button"
                 className="nav-link dropdown-btn"
-                onClick={() => setSpareOpen(!spareOpen)}
+                ref={desktopSpareButtonRef}
+                aria-expanded={spareOpen}
+                aria-controls="desktop-spare-menu"
+                onClick={() => setSpareOpen((isOpen) => !isOpen)}
               >
                 Spare Parts <span className="arrow">▾</span>
               </button>
 
               {spareOpen && (
-                <div className="dropdown-menu">
+                <div className="dropdown-menu" id="desktop-spare-menu">
                   <Link to="/spare-parts" onClick={closeMenus}>
                     All Spare Parts
                   </Link>
@@ -115,10 +153,10 @@ export default function Navbar() {
               )}
             </div>
 
-            <Link to="/catalog" className="nav-link">
+            <Link to="/catalog" className="nav-link" onClick={closeMenus}>
               Catalog
             </Link>
-            <Link to="/#contact" className="nav-link">
+            <Link to="/#contact" className="nav-link" onClick={closeMenus}>
               Contact Us
             </Link>
 
@@ -129,9 +167,15 @@ export default function Navbar() {
 
           {/* Mobile Hamburger Toggle */}
           <button
+            type="button"
             className="mobile-hamburger"
-            aria-label="Toggle Navigation"
-            onClick={() => setOpen(!open)}
+            aria-label={open ? "Close navigation" : "Open navigation"}
+            aria-expanded={open}
+            aria-controls="mobile-navigation-menu"
+            onClick={() => {
+              setOpen((isOpen) => !isOpen);
+              setSpareOpen(false);
+            }}
           >
             <span className="bar"></span>
             <span className="bar"></span>
@@ -141,7 +185,7 @@ export default function Navbar() {
 
         {/* Mobile Dropdown View */}
         {open && (
-          <div className="mobile-menu-drawer">
+          <div className="mobile-menu-drawer" id="mobile-navigation-menu">
             <Link to="/#top" onClick={closeMenus}>
               Home
             </Link>
@@ -152,12 +196,18 @@ export default function Navbar() {
               Products
             </Link>
 
-            <div className="mobile-spare">
-              <button onClick={() => setSpareOpen(!spareOpen)}>
+            <div className="mobile-spare" ref={mobileSpareRef}>
+              <button
+                type="button"
+                ref={mobileSpareButtonRef}
+                aria-expanded={spareOpen}
+                aria-controls="mobile-spare-menu"
+                onClick={() => setSpareOpen((isOpen) => !isOpen)}
+              >
                 Spare Parts ▾
               </button>
               {spareOpen && (
-                <div className="mobile-spare-links">
+                <div className="mobile-spare-links" id="mobile-spare-menu">
                   <Link to="/spare-parts" onClick={closeMenus}>
                     All Spare Parts
                   </Link>

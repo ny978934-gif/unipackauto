@@ -252,6 +252,11 @@
   transform: rotate(180deg);
 }
 
+.dropdown-wrapper.is-open .dropdown-btn .arrow,
+.dropdown-wrapper:focus-within .dropdown-btn .arrow {
+  transform: rotate(180deg);
+}
+
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 10px);
