@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import heroImageA from '../assests/a.jpg';
 import heroImageB from '../assests/b.jpg';
 import heroImageC from '../assests/c.jpg';
@@ -108,13 +109,13 @@ export default function Hero() {
             </p>
 
             <div key={`cta-${index}`} className="hero-actions animate-fade-up-delay-2">
-              <button className="btn btn-primary group">
+              <Link to="/#products" className="btn btn-primary group">
                 Find More
                 <ArrowRight className="btn-icon" />
-              </button>
-              <button className="btn btn-secondary">
+              </Link>
+              <Link to="/#contact" className="btn btn-secondary">
                 Contact Us
-              </button>
+              </Link>
             </div>
           </div>
         </div>

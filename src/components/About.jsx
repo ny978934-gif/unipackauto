@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import aboutImage from '../assests/a.jpg';
 import './About.css';
 
 export default function About() {
@@ -22,7 +24,7 @@ export default function About() {
         <div className="about__media">
           <div className="about__image-wrapper">
             <img
-              src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80"
+              src={aboutImage}
               alt="Unipackauto India manufacturing facility with automated machinery"
               className="about__image"
               loading="lazy"
@@ -101,7 +103,7 @@ export default function About() {
           </div>
 
           <div className="about__actions">
-            <button className="about__cta">
+            <Link to="/#contact" className="about__cta">
               Get a Quote
               <svg
                 width="18"
@@ -116,10 +118,10 @@ export default function About() {
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />
               </svg>
-            </button>
-            <button className="about__cta-secondary">
+            </Link>
+            <Link to="/#products" className="about__cta-secondary">
               View All Products
-            </button>
+            </Link>
           </div>
         </div>
       </div>

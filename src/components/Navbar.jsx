@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { API } from "../spareApi";
 import logo from "../assests/logo.jpeg";
@@ -10,16 +10,20 @@ export default function Navbar() {
   const [spareOpen, setSpareOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [spareCategories, setSpareCategories] = useState([]);
+
+  // Custom cursor state
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [cursorVisible, setCursorVisible] = useState(false);
+  const [cursorHovered, setCursorHovered] = useState(false);
+
   const desktopSpareRef = useRef(null);
   const desktopSpareButtonRef = useRef(null);
   const mobileSpareRef = useRef(null);
   const mobileSpareButtonRef = useRef(null);
+  const dropdownMenuRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => {
-      // Jab scroll threshold se aage jaye toh sticky mode trigger karein
-      setScrolled(window.scrollY > 40);
-    };
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -30,7 +34,6 @@ export default function Navbar() {
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setSpareCategories(Array.isArray(data) ? data : []))
       .catch(() => setSpareCategories([]));
-
     return () => controller.abort();
   }, []);
 
@@ -49,7 +52,6 @@ export default function Navbar() {
     };
     const closeOnEscape = (event) => {
       if (event.key !== "Escape") return;
-
       setSpareOpen(false);
       const activeElement = document.activeElement;
       const trigger = mobileSpareRef.current?.contains(activeElement)
@@ -66,6 +68,20 @@ export default function Navbar() {
     };
   }, [spareOpen]);
 
+  // Track mouse inside the desktop dropdown for the custom cursor
+  const handleDropdownMouseMove = useCallback((e) => {
+    setCursorPos({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  const handleDropdownMouseEnter = useCallback(() => {
+    setCursorVisible(true);
+  }, []);
+
+  const handleDropdownMouseLeave = useCallback(() => {
+    setCursorVisible(false);
+    setCursorHovered(false);
+  }, []);
+
   const closeMenus = () => {
     setOpen(false);
     setSpareOpen(false);
@@ -73,7 +89,7 @@ export default function Navbar() {
 
   return (
     <header className={`header-wrapper ${scrolled ? "is-sticky" : ""}`}>
-      {/* Top Contact Bar (Normal scroll ke sath upar chala jayega) */}
+      {/* Top Contact Bar */}
       <div className="top-info-bar">
         <div className="top-info-container">
           <div className="top-info-left">
@@ -85,7 +101,6 @@ export default function Navbar() {
             </a>
             <span className="top-info-item">📍 Bhiwadi (Rajasthan - India)</span>
           </div>
-
           <div className="top-info-right">
             <a
               href="https://wa.me/919785377675"
@@ -99,7 +114,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Floating White Card Navbar (Scroll par sticky ho jayega) */}
+      {/* Floating Navbar Card */}
       <div className="navbar-container-outer">
         <nav className="navbar-card">
           {/* Logo */}
@@ -109,20 +124,16 @@ export default function Navbar() {
 
           {/* Desktop Nav Items */}
           <div className="navbar-menu-desktop">
-            <Link to="/#top" className="nav-link active" onClick={closeMenus}>
-              Home
-            </Link>
-            <Link to="/#about" className="nav-link" onClick={closeMenus}>
-              About Us
-            </Link>
-            <Link to="/#products" className="nav-link" onClick={closeMenus}>
-              Products
-            </Link>
+            <Link to="/#top" className="nav-link active" onClick={closeMenus}>Home</Link>
+            <Link to="/#about" className="nav-link" onClick={closeMenus}>About Us</Link>
+            <Link to="/#products" className="nav-link" onClick={closeMenus}>Products</Link>
 
             {/* Spare Parts Dropdown */}
             <div
               className={`dropdown-wrapper ${spareOpen ? "is-open" : ""}`}
               ref={desktopSpareRef}
+              onMouseEnter={() => setSpareOpen(true)}
+              onMouseLeave={() => setSpareOpen(false)}
             >
               <button
                 type="button"
@@ -130,42 +141,59 @@ export default function Navbar() {
                 ref={desktopSpareButtonRef}
                 aria-expanded={spareOpen}
                 aria-controls="desktop-spare-menu"
-                onClick={() => setSpareOpen((isOpen) => !isOpen)}
+                onClick={(event) =>
+                  setSpareOpen((isOpen) =>
+                    event.detail > 0 ? true : !isOpen
+                  )
+                }
               >
                 Spare Parts <span className="arrow">▾</span>
               </button>
 
-              {spareOpen && (
-                <div className="dropdown-menu" id="desktop-spare-menu">
-                  <Link to="/spare-parts" onClick={closeMenus}>
-                    All Spare Parts
+              {/* Custom cursor dot — only visible inside the dropdown */}
+              <div
+                className={`dropdown-cursor ${cursorVisible ? "visible" : ""} ${cursorHovered ? "hovered" : ""}`}
+                style={{ left: cursorPos.x, top: cursorPos.y }}
+                aria-hidden="true"
+              />
+
+              <div
+                className="dropdown-menu"
+                id="desktop-spare-menu"
+                aria-hidden={!spareOpen}
+                ref={dropdownMenuRef}
+                onMouseMove={handleDropdownMouseMove}
+                onMouseEnter={handleDropdownMouseEnter}
+                onMouseLeave={handleDropdownMouseLeave}
+              >
+                <Link
+                  to="/spare-parts"
+                  onClick={closeMenus}
+                  onMouseEnter={() => setCursorHovered(true)}
+                  onMouseLeave={() => setCursorHovered(false)}
+                >
+                  All Spare Parts
+                </Link>
+                {spareCategories.map((cat) => (
+                  <Link
+                    key={cat._id || cat.slug}
+                    to={`/spare-parts/${cat.slug}`}
+                    onClick={closeMenus}
+                    onMouseEnter={() => setCursorHovered(true)}
+                    onMouseLeave={() => setCursorHovered(false)}
+                  >
+                    {cat.name}
                   </Link>
-                  {spareCategories.map((cat) => (
-                    <Link
-                      key={cat._id || cat.slug}
-                      to={`/spare-parts/${cat.slug}`}
-                      onClick={closeMenus}
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                ))}
+              </div>
             </div>
 
-            <Link to="/catalog" className="nav-link" onClick={closeMenus}>
-              Catalog
-            </Link>
-            <Link to="/#contact" className="nav-link" onClick={closeMenus}>
-              Contact Us
-            </Link>
-
-            <Link to="/#contact" className="btn-quote" onClick={closeMenus}>
-              Get a Quote
-            </Link>
+            <Link to="/catalog" className="nav-link" onClick={closeMenus}>Catalog</Link>
+            <Link to="/#contact" className="nav-link" onClick={closeMenus}>Contact Us</Link>
+            <Link to="/#contact" className="btn-quote" onClick={closeMenus}>Get a Quote</Link>
           </div>
 
-          {/* Mobile Hamburger Toggle */}
+          {/* Mobile Hamburger */}
           <button
             type="button"
             className="mobile-hamburger"
@@ -183,18 +211,12 @@ export default function Navbar() {
           </button>
         </nav>
 
-        {/* Mobile Dropdown View */}
+        {/* Mobile Drawer */}
         {open && (
           <div className="mobile-menu-drawer" id="mobile-navigation-menu">
-            <Link to="/#top" onClick={closeMenus}>
-              Home
-            </Link>
-            <Link to="/#about" onClick={closeMenus}>
-              About Us
-            </Link>
-            <Link to="/#products" onClick={closeMenus}>
-              Products
-            </Link>
+            <Link to="/#top" onClick={closeMenus}>Home</Link>
+            <Link to="/#about" onClick={closeMenus}>About Us</Link>
+            <Link to="/#products" onClick={closeMenus}>Products</Link>
 
             <div className="mobile-spare" ref={mobileSpareRef}>
               <button
@@ -208,9 +230,7 @@ export default function Navbar() {
               </button>
               {spareOpen && (
                 <div className="mobile-spare-links" id="mobile-spare-menu">
-                  <Link to="/spare-parts" onClick={closeMenus}>
-                    All Spare Parts
-                  </Link>
+                  <Link to="/spare-parts" onClick={closeMenus}>All Spare Parts</Link>
                   {spareCategories.map((cat) => (
                     <Link
                       key={cat._id || cat.slug}
@@ -224,12 +244,8 @@ export default function Navbar() {
               )}
             </div>
 
-            <Link to="/catalog" onClick={closeMenus}>
-              Catalog
-            </Link>
-            <Link to="/#contact" onClick={closeMenus}>
-              Contact Us
-            </Link>
+            <Link to="/catalog" onClick={closeMenus}>Catalog</Link>
+            <Link to="/#contact" onClick={closeMenus}>Contact Us</Link>
             <Link to="/#contact" className="btn-quote-mobile" onClick={closeMenus}>
               Get a Quote
             </Link>

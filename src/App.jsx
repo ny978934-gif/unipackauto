@@ -26,7 +26,7 @@ function HashScroll() {
       const target = document.querySelector(location.hash);
       if (!target) return;
 
-      const navbarHeight = document.querySelector(".navbar")?.offsetHeight || 0;
+      const navbarHeight = document.querySelector(".navbar-container-outer")?.offsetHeight || 0;
       const targetTop = target.getBoundingClientRect().top + window.scrollY - navbarHeight;
       window.scrollTo({ top: targetTop, behavior: "smooth" });
     };
