@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { API } from "../spareApi";
 import logo from "../assests/logo.jpeg";
@@ -11,16 +11,10 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [spareCategories, setSpareCategories] = useState([]);
 
-  // Custom cursor state
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-  const [cursorVisible, setCursorVisible] = useState(false);
-  const [cursorHovered, setCursorHovered] = useState(false);
-
   const desktopSpareRef = useRef(null);
   const desktopSpareButtonRef = useRef(null);
   const mobileSpareRef = useRef(null);
   const mobileSpareButtonRef = useRef(null);
-  const dropdownMenuRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -67,20 +61,6 @@ export default function Navbar() {
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, [spareOpen]);
-
-  // Track mouse inside the desktop dropdown for the custom cursor
-  const handleDropdownMouseMove = useCallback((e) => {
-    setCursorPos({ x: e.clientX, y: e.clientY });
-  }, []);
-
-  const handleDropdownMouseEnter = useCallback(() => {
-    setCursorVisible(true);
-  }, []);
-
-  const handleDropdownMouseLeave = useCallback(() => {
-    setCursorVisible(false);
-    setCursorHovered(false);
-  }, []);
 
   const closeMenus = () => {
     setOpen(false);
@@ -150,27 +130,14 @@ export default function Navbar() {
                 Spare Parts <span className="arrow">▾</span>
               </button>
 
-              {/* Custom cursor dot — only visible inside the dropdown */}
-              <div
-                className={`dropdown-cursor ${cursorVisible ? "visible" : ""} ${cursorHovered ? "hovered" : ""}`}
-                style={{ left: cursorPos.x, top: cursorPos.y }}
-                aria-hidden="true"
-              />
-
               <div
                 className="dropdown-menu"
                 id="desktop-spare-menu"
                 aria-hidden={!spareOpen}
-                ref={dropdownMenuRef}
-                onMouseMove={handleDropdownMouseMove}
-                onMouseEnter={handleDropdownMouseEnter}
-                onMouseLeave={handleDropdownMouseLeave}
               >
                 <Link
                   to="/spare-parts"
                   onClick={closeMenus}
-                  onMouseEnter={() => setCursorHovered(true)}
-                  onMouseLeave={() => setCursorHovered(false)}
                 >
                   All Spare Parts
                 </Link>
@@ -179,8 +146,6 @@ export default function Navbar() {
                     key={cat._id || cat.slug}
                     to={`/spare-parts/${cat.slug}`}
                     onClick={closeMenus}
-                    onMouseEnter={() => setCursorHovered(true)}
-                    onMouseLeave={() => setCursorHovered(false)}
                   >
                     {cat.name}
                   </Link>
