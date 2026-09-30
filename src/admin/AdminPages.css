@@ -134,6 +134,44 @@
   font-size: 13px;
 }
 
+.admin-table-search {
+  display: grid;
+  gap: 7px;
+  padding: 16px 22px;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-table-search label {
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-table-search input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  padding: 11px 13px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.admin-table-search input:focus {
+  border-color: #66116f;
+  outline: 2px solid #f1e6f3;
+}
+
+.admin-product-image-preview {
+  display: block;
+  width: 100px;
+  height: 100px;
+  margin-top: 10px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
 .table-wrapper {
   overflow-x: auto;
 }

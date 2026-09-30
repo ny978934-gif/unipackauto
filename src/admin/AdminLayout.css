@@ -2,21 +2,25 @@
   min-height: 100vh;
   display: flex;
   background: #f8f7f4;
+  /* Break out of the App's <main> wrapper so admin fills full viewport */
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  overflow: hidden;
 }
 
 /* SIDEBAR */
 
 .admin-sidebar {
   width: 250px;
-  min-height: 100vh;
+  height: 100vh;
   background: #ffffff;
   border-right: 1px solid #e8e4e1;
   display: flex;
   flex-direction: column;
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  flex-shrink: 0;
+  overflow-y: auto;
+  position: relative; /* no longer needs fixed — parent .admin-layout is fixed */
 }
 
 .admin-logo {
@@ -93,8 +97,12 @@
 /* MAIN */
 
 .admin-main {
-  margin-left: 250px;
-  width: calc(100% - 250px);
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* HEADER */
@@ -151,6 +159,8 @@
 
 .admin-content {
   padding: 30px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* MOBILE */
@@ -177,14 +187,11 @@
   .admin-link {
     justify-content: center;
     padding: 14px;
+    font-size: 0;
   }
 
   .admin-link span {
     font-size: 20px;
-  }
-
-  .admin-link {
-    font-size: 0;
   }
 
   .admin-sidebar-bottom {
@@ -196,8 +203,8 @@
   }
 
   .admin-main {
-    margin-left: 70px;
-    width: calc(100% - 70px);
+    flex: 1;
+    min-width: 0;
   }
 
   .admin-header {

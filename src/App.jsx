@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./components/pages/Home.jsx";
 import SpareParts from "./components/pages/spareparts/SpareParts.jsx";
+import MachineProducts from "./components/pages/products/Products.jsx";
 import SubCategory from "./components/pages/spareparts/SubCategory.jsx";
 import SubSubCategory from "./components/pages/spareparts/SubSubCategory.jsx";
 import ProductDetails from "./components/pages/spareparts/ProductDetails.jsx";
@@ -13,6 +14,7 @@ import Dashboard from "./admin/Dashboard.jsx";
 import Categories from "./admin/Categories.jsx";
 import SubCategories from "./admin/SubCategories.jsx";
 import AdminProducts from "./admin/Products2.jsx";
+import DocumentUploader from "./admin/DocumentUploader.jsx";
 import Catalog from "./components/catalog.jsx";
 import "./components/UnifiedTheme.css";
 
@@ -38,40 +40,53 @@ function HashScroll() {
   return null;
 }
 
-export default function App() {
+// Wraps all routes — hides public Navbar/Footer on admin pages
+function AppShell() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
+
   return (
-    <BrowserRouter>
-      <HashScroll />
-      <Navbar />
+    <>
+      {!isAdmin && <Navbar />}
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          {/* Main Spare Parts page */}
+          <Route path="/products" element={<MachineProducts />} />
+          <Route path="/products/:categorySlug" element={<SubCategory type="machine" />} />
+          <Route path="/products/:categorySlug/:subCategorySlug" element={<SubSubCategory type="machine" />} />
+          <Route path="/products/:categorySlug/:subCategorySlug/:subSubCategorySlug" element={<Products type="machine" />} />
+          <Route path="/products/:categorySlug/:subCategorySlug/:subSubCategorySlug/:productSlug" element={<ProductDetails type="machine" />} />
+          {/* Spare Parts */}
           <Route path="/spare-parts" element={<SpareParts />} />
-          {/* Sub Spare Parts list for selected category */}
           <Route path="/spare-parts/:categorySlug" element={<SubCategory />} />
           <Route path="/spare-parts/:categorySlug/:subCategorySlug" element={<SubSubCategory />} />
           <Route path="/spare-parts/:categorySlug/:subCategorySlug/:subSubCategorySlug" element={<Products />} />
-          {/* Direct Product Details page */}
-          {/* Nested Subcategory Product Details page */}
           <Route path="/spare-parts/:categorySlug/:subCategorySlug/:subSubCategorySlug/:productSlug" element={<ProductDetails />} />
-          
-          {/* Admin Portal */}
+          {/* Admin Portal — renders its own sidebar/header, no public nav */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="categories" element={<Categories />} />
             <Route path="subcategories" element={<SubCategories />} />
             <Route path="products" element={<AdminProducts />} />
+            <Route path="machines" element={<AdminProducts type="machine" />} />
+            <Route path="document-uploader" element={<DocumentUploader />} />
           </Route>
-
           {/* Product Catalog */}
           <Route path="/catalog" element={<Catalog />} />
-
-          {/* Fallback to Home */}
+          {/* Fallback */}
           <Route path="*" element={<Home />} />
         </Routes>
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <HashScroll />
+      <AppShell />
     </BrowserRouter>
   );
 }

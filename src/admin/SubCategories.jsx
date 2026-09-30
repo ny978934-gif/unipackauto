@@ -6,6 +6,7 @@ const emptySubcategory = { categoryId: "", name: "", slug: "", description: "", 
 const emptySubSubcategory = { categoryId: "", subCategoryId: "", name: "", slug: "", imageName: "" };
 
 export default function SubCategories() {
+  const [type, setType] = useState("sparepart");
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [subSubcategories, setSubSubcategories] = useState([]);
@@ -19,11 +20,11 @@ export default function SubCategories() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const load = async () => {
+  const load = async (catalogType = type) => {
     const [categoryResponse, subcategoryResponse, subSubcategoryResponse] = await Promise.all([
-      fetch(`${API}/api/spare/categories`),
-      fetch(`${API}/api/subcategories`),
-      fetch(`${API}/api/sub-subcategories`),
+      fetch(`${API}/api/spare/categories?type=${catalogType}`),
+      fetch(`${API}/api/subcategories?type=${catalogType}`),
+      fetch(`${API}/api/sub-subcategories?type=${catalogType}`),
     ]);
     if (!categoryResponse.ok || !subcategoryResponse.ok || !subSubcategoryResponse.ok) {
       throw new Error("Unable to load category data.");
@@ -34,8 +35,8 @@ export default function SubCategories() {
   };
 
   useEffect(() => {
-    load().catch((error) => setMessage(error.message));
-  }, []);
+    load(type).catch((error) => setMessage(error.message));
+  }, [type]);
 
   const visibleSubcategories = useMemo(
     () => subcategories.filter((item) => (item.category?._id || item.category) === subSubForm.categoryId),
@@ -57,6 +58,7 @@ export default function SubCategories() {
     try {
       const body = new FormData();
       body.append("name", newCategoryName.trim());
+      body.append("type", type);
       const response = await fetch(`${API}/api/spare/categories`, { method: "POST", body });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Unable to create main category.");
@@ -78,6 +80,7 @@ export default function SubCategories() {
     try {
       const body = new FormData();
       Object.entries(subForm).forEach(([key, value]) => body.append(key, value));
+      body.append("type", type);
       subImages.forEach((file) => body.append("images", file));
       const response = await fetch(`${API}/api/subcategories`, { method: "POST", body });
       const data = await response.json();
@@ -100,6 +103,7 @@ export default function SubCategories() {
     try {
       const body = new FormData();
       Object.entries(subSubForm).forEach(([key, value]) => body.append(key, value));
+      body.append("type", type);
       subSubImages.forEach((file) => body.append("images", file));
       const response = await fetch(`${API}/api/sub-subcategories`, { method: "POST", body });
       const data = await response.json();
@@ -170,7 +174,29 @@ export default function SubCategories() {
       {message && <p className="admin-notice">{message}</p>}
 
       <div className="admin-form-card">
-        <h2>Create main category</h2>
+        <div className="form-group">
+          <label htmlFor="hierarchy-type">Catalogue</label>
+          <select
+            id="hierarchy-type"
+            value={type}
+            disabled={loading}
+            onChange={(event) => {
+              const selectedType = event.target.value;
+              setType(selectedType);
+              setNewCategoryName("");
+              setSubForm(emptySubcategory);
+              setSubSubForm(emptySubSubcategory);
+              setMessage("");
+            }}
+          >
+            <option value="sparepart">Spare Parts</option>
+            <option value="machine">Products / Machines</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="admin-form-card">
+        <h2>Create {type === "machine" ? "product / machine" : "spare parts"} category</h2>
         <form onSubmit={createCategory}>
           <div className="form-row">
             <div className="form-group"><label>Main category name *</label><input required value={newCategoryName} onChange={(event) => setNewCategoryName(event.target.value)} placeholder="e.g. Strapping Machine Parts" /></div>

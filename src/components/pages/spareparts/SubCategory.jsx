@@ -24,8 +24,10 @@ const newestFirst = (items = []) =>
     );
   });
 
-export default function SubCategory() {
+export default function SubCategory({ type = "sparepart" }) {
   const { categorySlug } = useParams();
+  const catalogPath = type === "machine" ? "/products" : "/spare-parts";
+  const catalogLabel = type === "machine" ? "Products" : "Spare Parts";
 
   const [data, setData] = useState(null);
   const [state, setState] = useState("loading");
@@ -34,7 +36,7 @@ export default function SubCategory() {
     const controller = new AbortController();
 
     fetch(
-      `${API}/api/spare/categories/${encodeURIComponent(categorySlug)}`,
+      `${API}/api/spare/categories/${encodeURIComponent(categorySlug)}?type=${type}`,
       {
         signal: controller.signal,
       }
@@ -62,7 +64,7 @@ export default function SubCategory() {
       });
 
     return () => controller.abort();
-  }, [categorySlug]);
+  }, [categorySlug, type]);
 
   const category = data?.category;
 
@@ -70,13 +72,13 @@ export default function SubCategory() {
     <div className="subcategory-page">
       <section className="subcategory-hero">
         <div>
-          <h1>{category?.name || "Spare Parts"}</h1>
+          <h1>{category?.name || catalogLabel}</h1>
 
           <div className="subcategory-breadcrumb">
             <Link to="/">Home</Link>
             <span>/</span>
 
-            <Link to="/spare-parts">Spare Parts</Link>
+            <Link to={catalogPath}>{catalogLabel}</Link>
             <span>/</span>
 
             <b>{category?.name || categorySlug}</b>
@@ -117,7 +119,7 @@ export default function SubCategory() {
               </div>
 
               <Link
-                to={`/spare-parts/${categorySlug}/${subCategory.slug}`}
+                to={`${catalogPath}/${categorySlug}/${subCategory.slug}`}
                 className="subcategory-title"
                 aria-label={`Open ${subCategory.name}`}
               >
@@ -131,4 +133,3 @@ export default function SubCategory() {
     </div>
   );
 }
-

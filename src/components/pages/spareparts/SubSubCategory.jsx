@@ -24,8 +24,10 @@ const newestFirst = (items = []) =>
     );
   });
 
-export default function SubSubCategory() {
+export default function SubSubCategory({ type = "sparepart" }) {
   const { categorySlug, subCategorySlug } = useParams();
+  const catalogPath = type === "machine" ? "/products" : "/spare-parts";
+  const catalogLabel = type === "machine" ? "Products" : "Spare Parts";
 
   const [data, setData] = useState(null);
   const [state, setState] = useState("loading");
@@ -36,10 +38,8 @@ export default function SubSubCategory() {
     fetch(
       `${API}/api/sub-subcategories/category/${encodeURIComponent(
         categorySlug
-      )}/${encodeURIComponent(subCategorySlug)}`,
-      {
-        signal: controller.signal,
-      }
+      )}/${encodeURIComponent(subCategorySlug)}?type=${type}`,
+      { signal: controller.signal }
     )
       .then(async (response) => {
         const result = await response.json().catch(() => ({}));
@@ -70,13 +70,13 @@ export default function SubSubCategory() {
       });
 
     return () => controller.abort();
-  }, [categorySlug, subCategorySlug]);
+  }, [categorySlug, subCategorySlug, type]);
 
   return (
     <div className="subsubcategory-page">
       <section className="subsubcategory-hero">
         <div>
-          <span>SPARE PARTS CATALOGUE</span>
+          <span>{type === "machine" ? "MACHINES CATALOGUE" : "SPARE PARTS CATALOGUE"}</span>
 
           <h1>
             {data?.subCategory?.name || "Sub-subcategories"}
@@ -86,10 +86,10 @@ export default function SubSubCategory() {
             <Link to="/">Home</Link>
             <b>/</b>
 
-            <Link to="/spare-parts">Spare Parts</Link>
+            <Link to={catalogPath}>{catalogLabel}</Link>
             <b>/</b>
 
-            <Link to={`/spare-parts/${categorySlug}`}>
+            <Link to={`${catalogPath}/${categorySlug}`}>
               {data?.category?.name || categorySlug}
             </Link>
 
@@ -142,7 +142,7 @@ export default function SubSubCategory() {
 
               <Link
                 className="subsubcategory-card-title"
-                to={`/spare-parts/${categorySlug}/${subCategorySlug}/${item.slug}`}
+                to={`${catalogPath}/${categorySlug}/${subCategorySlug}/${item.slug}`}
                 aria-label={`Open products in ${item.name}`}
               >
                 <h2>{item.name}</h2>
@@ -157,7 +157,7 @@ export default function SubSubCategory() {
 
         <Link
           className="subsubcategory-back"
-          to={`/spare-parts/${categorySlug}`}
+          to={`${catalogPath}/${categorySlug}`}
         >
           ← Back to subcategories
         </Link>
@@ -165,4 +165,3 @@ export default function SubSubCategory() {
     </div>
   );
 }
-

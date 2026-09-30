@@ -93,7 +93,7 @@ const Dashboard = () => {
             <span>📁</span>
             <div>
               <h3>Manage Categories</h3>
-              <p>Add, edit or delete machine categories</p>
+              <p>Organize spare-parts and machine categories</p>
             </div>
           </Link>
 
@@ -101,15 +101,23 @@ const Dashboard = () => {
             <span>📂</span>
             <div>
               <h3>Manage Sub Categories</h3>
-              <p>Organize spare parts groups</p>
+              <p>Organize groups for both catalogues</p>
             </div>
           </Link>
 
           <Link to="/admin/products" className="quick-card">
             <span>⚙️</span>
             <div>
-              <h3>Manage Products</h3>
+              <h3>Manage Spare Parts</h3>
               <p>Add new spare parts, pricing &amp; codes</p>
+            </div>
+          </Link>
+
+          <Link to="/admin/machines" className="quick-card">
+            <span>🏭</span>
+            <div>
+              <h3>Manage Products / Machines</h3>
+              <p>Add, edit, delete, or import machines and their catalogue details</p>
             </div>
           </Link>
         </div>
@@ -117,7 +125,7 @@ const Dashboard = () => {
 
       {/* STRUCTURE */}
       <div className="structure-card">
-        <h2>Spare Parts Structure</h2>
+        <h2>Catalog Structure</h2>
         <div className="structure-flow">
           <div className="structure-item">
             <span>📁</span>

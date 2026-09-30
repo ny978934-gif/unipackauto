@@ -53,7 +53,27 @@ const AdminLayout = () => {
             }
           >
             <span>⚙️</span>
-            Products
+            Spare Parts Management
+          </NavLink>
+
+          <NavLink
+            to="/admin/machines"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>🏭</span>
+            Products / Machines
+          </NavLink>
+
+          <NavLink
+            to="/admin/document-uploader"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            <span>📄</span>
+            Document Uploader
           </NavLink>
 
         </nav>
@@ -74,7 +94,7 @@ const AdminLayout = () => {
 
           <div>
             <h3>Admin Panel</h3>
-            <p>Manage your spare parts website</p>
+            <p>Manage your spare parts and machine catalogues</p>
           </div>
 
           <div className="admin-profile">
