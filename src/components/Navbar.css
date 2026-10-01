@@ -237,9 +237,7 @@
   z-index: 1;
 }
 
-.dropdown-wrapper.is-open,
-.dropdown-wrapper:hover,
-.dropdown-wrapper:focus-within {
+.dropdown-wrapper.is-open {
   z-index: 1001;
 }
 
@@ -294,9 +292,7 @@
   cursor: default;
 }
 
-.dropdown-wrapper.is-open .dropdown-menu,
-.dropdown-wrapper:hover .dropdown-menu,
-.dropdown-wrapper:focus-within .dropdown-menu {
+.dropdown-wrapper.is-open .dropdown-menu {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
