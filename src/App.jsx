@@ -12,7 +12,6 @@ import Dashboard from "./admin/Dashboard.jsx";
 import Categories from "./admin/Categories.jsx";
 import AdminProducts from "./admin/Products2.jsx";
 import Inquiry from "./admin/Inquiry.jsx";
-import DocumentUploader from "./admin/DocumentUploader.jsx";
 import SparePartsUploader from "./admin/SparePartsUploader.jsx";
 import Catalog from "./components/catalog.jsx";
 import "./components/UnifiedTheme.css";
@@ -64,7 +63,6 @@ function AppShell() {
             <Route path="products" element={<AdminProducts />} />
             <Route path="machines" element={<AdminProducts type="machine" />} />
             <Route path="inquiries" element={<Inquiry />} />
-            <Route path="document-uploader" element={<DocumentUploader />} />
             <Route path="spare-parts-uploader" element={<SparePartsUploader />} />
           </Route>
           {/* Product Catalog */}

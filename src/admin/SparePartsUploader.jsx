@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { API, formatPrice, readApiResponse } from "../spareApi";
-import "./DocumentUploader.css";
 import "./AdminPages.css";
+import "./SparePartsUploader.css";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const acceptedExtensions = new Set(["doc", "docx", "xls", "xlsx"]);
@@ -94,7 +94,7 @@ export default function SparePartsUploader() {
   };
 
   return (
-    <div className="admin-page document-uploader-page">
+    <div className="admin-page spare-parts-uploader-page">
       <div className="page-title">
         <div>
           <h1>Spare parts document uploader</h1>
@@ -104,7 +104,7 @@ export default function SparePartsUploader() {
 
       {message && <p className="admin-notice" role="status">{message}</p>}
 
-      <form className="admin-form-card document-uploader-form" onSubmit={submit}>
+      <form className="admin-form-card spare-parts-uploader-form" onSubmit={submit}>
         <h2>Import spare parts</h2>
         <div className="form-group">
           <label htmlFor="spare-import-category">Main Spare Part Category *</label>
@@ -127,7 +127,7 @@ export default function SparePartsUploader() {
           </select>
         </div>
 
-        <div className={`form-group ${!categoryId ? "du-file-disabled" : ""}`}>
+        <div className={`form-group ${!categoryId ? "sp-import-file-disabled" : ""}`}>
           <label htmlFor="spare-import-file">Word or Excel file *</label>
           <input
             id="spare-import-file"
@@ -143,29 +143,29 @@ export default function SparePartsUploader() {
               ? "Accepted: .doc, .docx, .xls, .xlsx · Maximum 10 MB"
               : "Select a main category to enable file selection."}
           </small>
-          {file && <p className="du-selected-file">Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)</p>}
+          {file && <p className="sp-import-selected-file">Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)</p>}
         </div>
 
-        <div className="du-fields-hint">
+        <div className="sp-import-fields-hint">
           <span>Required column:</span><code>Part Name</code>
           <span>Recognized columns:</span>
           <code>Price</code><code>Stock</code><code>UOM</code>
         </div>
-        <p className="du-import-help">
+        <p className="sp-import-help">
           Excel files should use the first row for column names. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
         </p>
-        <button className="primary-btn du-submit-btn" type="submit" disabled={!categoryId || !file || uploading}>
-          {uploading ? <><span className="du-spinner" aria-hidden="true" /> Parsing and importing…</> : "Upload & import spare parts"}
+        <button className="primary-btn sp-import-submit-btn" type="submit" disabled={!categoryId || !file || uploading}>
+          {uploading ? <><span className="sp-import-spinner" aria-hidden="true" /> Parsing and importing…</> : "Upload & import spare parts"}
         </button>
       </form>
 
       {imported?.products?.length > 0 && (
-        <section className="admin-table-card du-import-results">
+        <section className="admin-table-card sp-import-results">
           <div className="table-header">
             <h2>Imported spare parts</h2>
             <span>{imported.products.length}</span>
           </div>
-          <div className="du-import-category-link">
+          <div className="sp-import-category-link">
             Category: <Link to={`/spare-parts/${imported.category.slug}`}>{imported.category.name} — View all spare parts</Link>
           </div>
           <div className="table-wrapper">

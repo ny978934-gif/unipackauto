@@ -1,0 +1,78 @@
+.spare-parts-uploader-form {
+  max-width: 860px;
+}
+
+.sp-import-file-disabled {
+  opacity: 0.6;
+}
+
+.sp-import-selected-file {
+  margin: 9px 0 0;
+  color: #4a1155;
+  font-size: 13px;
+}
+
+.sp-import-help {
+  margin: 0 0 18px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sp-import-results {
+  margin-top: 25px;
+}
+
+.sp-import-category-link {
+  padding: 14px 22px;
+  border-bottom: 1px solid #eee;
+  color: #555;
+  font-size: 14px;
+}
+
+.sp-import-category-link a,
+.sp-import-results td a {
+  color: #1d5fa7;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sp-import-fields-hint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 18px;
+  font-size: 12px;
+  color: #999;
+}
+
+.sp-import-fields-hint code {
+  background: #f1e6f3;
+  color: #66116f;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.sp-import-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sp-import-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: sp-import-spin 0.7s linear infinite;
+}
+
+@keyframes sp-import-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
