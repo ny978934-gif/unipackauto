@@ -53,7 +53,6 @@ export default function ProductDetails({ type = "sparepart" }) {
           <h1>{product.name}</h1>
           {product.partCode && <div className="part-code">Item Code: <strong>{product.partCode}</strong></div>}
           {type === "sparepart" && <div className="product-uom">UOM: <strong>{uom || "—"}</strong></div>}
-          {type === "sparepart" && <div className="product-uom">Stock: <strong>{product.stock > 0 ? product.stock : "Out of stock"}</strong></div>}
           <div className="product-price">
             <span className="product-price-label">Price:</span>
             {product.price > 0 ? formatPrice(product.price) : "Price on Request"}
