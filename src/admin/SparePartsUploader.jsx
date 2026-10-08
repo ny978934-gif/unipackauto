@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { API, formatPrice, readApiResponse } from "../spareApi";
 import "./AdminPages.css";
@@ -14,6 +14,8 @@ const acceptedMimeTypes = new Set([
   "application/octet-stream",
 ]);
 
+const isExcelFile = (file) => ["xls", "xlsx"].includes(file?.name.split(".").pop()?.toLowerCase());
+
 export default function SparePartsUploader() {
   const [categories, setCategories] = useState([]);
   const [categoryId, setCategoryId] = useState("");
@@ -23,6 +25,7 @@ export default function SparePartsUploader() {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileInput = useRef(null);
+  const autoImportKey = useRef("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -39,6 +42,42 @@ export default function SparePartsUploader() {
       });
     return () => controller.abort();
   }, []);
+
+  const importFile = useCallback(async (selectedFile, selectedCategoryId) => {
+    if (!selectedCategoryId || !selectedFile) {
+      setMessage("Select a main spare part category and an import file first.");
+      return;
+    }
+    setUploading(true);
+    setMessage("");
+    setImported(null);
+    try {
+      const formData = new FormData();
+      formData.append("categoryId", selectedCategoryId);
+      formData.append("file", selectedFile);
+      const response = await fetch(`${API}/api/spare-parts/upload-parse`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await readApiResponse(response, "Unable to import spare parts.");
+      setImported(data);
+      setMessage(data.message || "Spare parts imported successfully.");
+      setFile(null);
+      if (fileInput.current) fileInput.current.value = "";
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setUploading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!categoryId || !file || !isExcelFile(file)) return;
+    const importKey = `${categoryId}:${file.name}:${file.size}:${file.lastModified}`;
+    if (autoImportKey.current === importKey) return;
+    autoImportKey.current = importKey;
+    importFile(file, categoryId);
+  }, [categoryId, file, importFile]);
 
   const chooseFile = (event) => {
     const selected = event.target.files?.[0] || null;
@@ -61,36 +100,13 @@ export default function SparePartsUploader() {
       setMessage("File is too large. Maximum allowed size is 10 MB.");
       return;
     }
+    autoImportKey.current = "";
     setFile(selected);
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!categoryId || !file) {
-      setMessage("Select a main spare part category and an import file first.");
-      return;
-    }
-    setUploading(true);
-    setMessage("");
-    setImported(null);
-    try {
-      const formData = new FormData();
-      formData.append("categoryId", categoryId);
-      formData.append("file", file);
-      const response = await fetch(`${API}/api/spare-parts/upload-parse`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await readApiResponse(response, "Unable to import spare parts.");
-      setImported(data);
-      setMessage(data.message || "Spare parts imported successfully.");
-      setFile(null);
-      if (fileInput.current) fileInput.current.value = "";
-    } catch (error) {
-      setMessage(error.message);
-    } finally {
-      setUploading(false);
-    }
+    await importFile(file, categoryId);
   };
 
   return (
@@ -115,9 +131,9 @@ export default function SparePartsUploader() {
             disabled={loadingCategories || uploading}
             onChange={(event) => {
               setCategoryId(event.target.value);
-              setFile(null);
               setImported(null);
-              if (fileInput.current) fileInput.current.value = "";
+              setMessage("");
+              autoImportKey.current = "";
             }}
           >
             <option value="">Select machine/category</option>
@@ -134,14 +150,14 @@ export default function SparePartsUploader() {
             ref={fileInput}
             type="file"
             accept=".doc,.docx,.xls,.xlsx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            disabled={!categoryId || uploading}
+            disabled={uploading}
             onChange={chooseFile}
             required
           />
           <small>
             {categoryId
-              ? "Accepted: .doc, .docx, .xls, .xlsx · Maximum 10 MB"
-              : "Select a main category to enable file selection."}
+              ? "Accepted: .doc, .docx, .xls, .xlsx · Maximum 10 MB. Excel files import automatically from the sheet matching the selected category."
+              : "Select a main category and an Excel file will import automatically from its matching sheet."}
           </small>
           {file && <p className="sp-import-selected-file">Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)</p>}
         </div>
@@ -152,10 +168,14 @@ export default function SparePartsUploader() {
           <code>Price</code><code>Stock</code><code>UOM</code>
         </div>
         <p className="sp-import-help">
-          Excel files should use the first row for column names. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
+          Excel sheets must be named after the selected category and use a header row with Part Name, Price, UOM, and Stock columns. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
         </p>
         <button className="primary-btn sp-import-submit-btn" type="submit" disabled={!categoryId || !file || uploading}>
-          {uploading ? <><span className="sp-import-spinner" aria-hidden="true" /> Parsing and importing…</> : "Upload & import spare parts"}
+          {uploading
+            ? <><span className="sp-import-spinner" aria-hidden="true" /> Parsing and importing…</>
+            : file && isExcelFile(file)
+              ? "Import matching Excel sheet"
+              : "Upload & import spare parts"}
         </button>
       </form>
 

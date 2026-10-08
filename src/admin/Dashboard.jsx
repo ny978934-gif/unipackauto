@@ -7,7 +7,6 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     categories: 0,
     products: 0,
-    inStock: 0,
     inquiries: 0,
     newInquiries: 0,
   });
@@ -25,7 +24,6 @@ const Dashboard = () => {
           setStats({
             categories: data.categories || 0,
             products: data.products || 0,
-            inStock: data.inStock || 0,
             inquiries: data.inquiries || 0,
             newInquiries: data.newInquiries || 0,
           });
@@ -70,13 +68,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon green">📦</div>
-          <div>
-            <span>In Stock</span>
-            <h2>{loading ? "..." : stats.inStock}</h2>
-          </div>
-        </div>
         <div className="stat-card">
           <div className="stat-icon blue">✉️</div>
           <div>

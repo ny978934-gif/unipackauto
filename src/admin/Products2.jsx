@@ -8,7 +8,6 @@ const emptyProduct = {
   name: "",
   slug: "",
   price: "",
-  stock: "0",
   uom: "",
   imageUrl: "",
   description: "",
@@ -126,7 +125,6 @@ export default function Products({ type = "sparepart" }) {
       name: product.name || "",
       slug: product.slug || "",
       price: product.price ?? "",
-      stock: product.stock ?? "0",
       uom: getProductUom(product),
       imageUrl: product.image || product.images?.[0] || "",
       description: product.description || "",
@@ -198,12 +196,6 @@ export default function Products({ type = "sparepart" }) {
             </div>
             {type === "sparepart" && (
               <div className="form-group">
-                <label htmlFor="product-stock">Stock quantity</label>
-                <input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(event) => updateField("stock", event.target.value)} />
-              </div>
-            )}
-            {type === "sparepart" && (
-              <div className="form-group">
                 <label htmlFor="product-uom">UOM (Unit of Measure)</label>
                 <input id="product-uom" value={form.uom} placeholder="e.g. piece, set, meter" onChange={(event) => updateField("uom", event.target.value)} />
               </div>
@@ -252,18 +244,18 @@ export default function Products({ type = "sparepart" }) {
         </div>
         <div className="table-wrapper">
           <table>
-            <thead><tr><th>Name</th><th>Machine name</th>{type === "sparepart" && <><th>Subcategory</th><th>Stock</th><th>UOM</th></>}<th>Price</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Name</th><th>Machine name</th>{type === "sparepart" && <><th>Subcategory</th><th>UOM</th></>}<th>Price</th><th>Actions</th></tr></thead>
             <tbody>
               {filteredProducts.map((item) => (
                 <tr key={item._id}>
                   <td>{item.name}</td><td>{item.category?.name || "—"}</td>
                   {type === "sparepart" && <td>{item.subcategory?.name || "—"}</td>}
-                  {type === "sparepart" && <><td>{item.stock ?? 0}</td><td>{getProductUom(item) || "—"}</td></>}
+                  {type === "sparepart" && <td>{getProductUom(item) || "—"}</td>}
                   <td>{formatPrice(item.price)}</td>
                   <td><button type="button" className="edit-btn" onClick={() => edit(item)}>Edit</button><button type="button" className="delete-btn" onClick={() => remove(item._id)}>Delete</button></td>
                 </tr>
               ))}
-              {!filteredProducts.length && <tr><td colSpan={type === "sparepart" ? 7 : 4}>{products.length ? "No items match your search." : "No items in this catalogue."}</td></tr>}
+              {!filteredProducts.length && <tr><td colSpan={type === "sparepart" ? 6 : 4}>{products.length ? "No items match your search." : "No items in this catalogue."}</td></tr>}
             </tbody>
           </table>
         </div>
