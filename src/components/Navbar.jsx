@@ -103,10 +103,10 @@ export default function Navbar() {
         <div className="top-info-container">
           <div className="top-info-left">
             <a href="tel:+919991226074" className="top-info-item">
-              📞 +91 99912 26074
+              📞 +91 9215521314
             </a>
             <a href="tel:+919215527314" className="top-info-item">
-              📞 +91 92155 27314
+              📞 +91 7232001235
             </a>
             <span className="top-info-item"> Bhiwadi (Rajasthan - India)</span>
           </div>
