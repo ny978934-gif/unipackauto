@@ -8,7 +8,6 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const [setupKey, setSetupKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const location = useLocation();
@@ -26,7 +25,7 @@ export default function AdminLogin() {
         body: JSON.stringify({
           email,
           password,
-          ...(isSetup ? { passwordConfirmation, setupKey } : {}),
+          ...(isSetup ? { passwordConfirmation } : {}),
         }),
       });
       const responseText = await response.text();
@@ -65,23 +64,10 @@ export default function AdminLogin() {
         <h1>{isSetup ? "Create first admin" : "Admin sign in"}</h1>
         <p className="admin-login-intro">
           {isSetup
-            ? "Initial setup is available once and requires the private setup key."
+            ? "Create the first admin account using the email authorized by the site administrator."
             : "Sign in with your authorized administrator account."}
         </p>
         <form onSubmit={submit}>
-            {isSetup && (
-              <div className="admin-login-field">
-                <label htmlFor="admin-setup-key">Private setup key</label>
-                <input
-                  id="admin-setup-key"
-                  type="password"
-                  autoComplete="off"
-                  value={setupKey}
-                  onChange={(event) => setSetupKey(event.target.value)}
-                  required
-                />
-              </div>
-            )}
             <div className="admin-login-field">
               <label htmlFor="admin-email">Email</label>
               <input
