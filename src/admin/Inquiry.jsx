@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { API } from "../spareApi";
+import { API, adminFetch } from "../spareApi";
 import "./AdminPages.css";
 import "./Inquiry.css";
 
@@ -20,7 +20,7 @@ export default function Inquiry() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`${API}/api/inquiries`, { signal });
+      const response = await adminFetch(`${API}/api/inquiries`, { signal });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || data.message || "Unable to load inquiries.");

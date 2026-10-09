@@ -24,21 +24,18 @@
 }
 
 .admin-logo {
-  padding: 28px 25px;
+  min-height: 112px;
+  padding: 16px 25px;
   border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
 }
 
-.admin-logo h2 {
-  margin: 0;
-  color: #66116f;
-  font-size: 24px;
-  letter-spacing: 1px;
-}
-
-.admin-logo span {
-  font-size: 11px;
-  color: #999;
-  letter-spacing: 2px;
+.admin-logo img {
+  display: block;
+  width: 100%;
+  max-height: 80px;
+  object-fit: contain;
 }
 
 /* NAV */
@@ -155,6 +152,23 @@
   color: #999;
 }
 
+.admin-logout-btn {
+  margin-left: 10px;
+  padding: 8px 12px;
+  border: 1px solid #e2d8e4;
+  border-radius: 7px;
+  background: #fff;
+  color: #66116f;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-logout-btn:hover {
+  background: #f7eef8;
+}
+
 /* CONTENT */
 
 .admin-content {
@@ -172,16 +186,12 @@
   }
 
   .admin-logo {
-    padding: 20px 10px;
-    text-align: center;
+    min-height: 76px;
+    padding: 10px 8px;
   }
 
-  .admin-logo h2 {
-    font-size: 16px;
-  }
-
-  .admin-logo span {
-    display: none;
+  .admin-logo img {
+    max-height: 54px;
   }
 
   .admin-link {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { API, formatPrice, getProductUom } from "../spareApi";
+import { API, adminFetch, formatPrice, getProductUom } from "../spareApi";
 import "./AdminPages.css";
 
 const emptyProduct = {
@@ -32,8 +32,8 @@ export default function Products({ type = "sparepart" }) {
   const load = async (signal) => {
     const options = signal ? { signal } : {};
     const [categoryResponse, productResponse] = await Promise.all([
-      fetch(`${API}/api/spare/categories?type=${type}`, options),
-      fetch(`${API}/api/products?type=${type}`, options),
+      adminFetch(`${API}/api/spare/categories?type=${type}`, options),
+      adminFetch(`${API}/api/products?type=${type}`, options),
     ]);
     if (!categoryResponse.ok) throw new Error("Unable to load spare-part categories.");
     if (!productResponse.ok) throw new Error("Unable to load spare parts.");
@@ -43,7 +43,7 @@ export default function Products({ type = "sparepart" }) {
 
     if (type === "sparepart") {
       try {
-        const subcategoryResponse = await fetch(`${API}/api/spare/subcategories`, options);
+        const subcategoryResponse = await adminFetch(`${API}/api/spare/subcategories`, options);
         if (!subcategoryResponse.ok) {
           setSubcategories([]);
           setSubcategoryApiAvailable(false);
@@ -98,7 +98,7 @@ export default function Products({ type = "sparepart" }) {
       body.append("images", JSON.stringify(form.imageUrl ? [form.imageUrl] : []));
       body.append("specifications", JSON.stringify(specifications.filter((item) => item.label.trim() && item.value.trim())));
       images.forEach((file) => body.append("images", file));
-      const response = await fetch(
+      const response = await adminFetch(
         editingId ? `${API}/api/products/${editingId}` : `${API}/api/products`,
         { method: editingId ? "PUT" : "POST", body }
       );
@@ -139,7 +139,7 @@ export default function Products({ type = "sparepart" }) {
   const remove = async (id) => {
     if (!window.confirm(`Delete this ${itemLabel}?`)) return;
     try {
-      const response = await fetch(`${API}/api/products/${id}`, { method: "DELETE" });
+      const response = await adminFetch(`${API}/api/products/${id}`, { method: "DELETE" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || `Unable to delete ${itemLabel}.`);
       setProducts((items) => items.filter((item) => item._id !== id));

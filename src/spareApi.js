@@ -1,4 +1,29 @@
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const ADMIN_TOKEN_KEY = "unipack-admin-token";
+
+function getAdminToken() {
+  return window.sessionStorage.getItem(ADMIN_TOKEN_KEY);
+}
+
+function setAdminToken(token) {
+  window.sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+}
+
+function clearAdminToken() {
+  window.sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
+async function adminFetch(url, options = {}) {
+  const headers = new Headers(options.headers || {});
+  const token = getAdminToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const response = await fetch(url, { ...options, headers });
+  if (response.status === 401 && token) {
+    clearAdminToken();
+    window.dispatchEvent(new Event("admin-auth-expired"));
+  }
+  return response;
+}
 
 function formatPrice(price) {
   if (price === undefined || price === null || price === "") return "Price on request";
@@ -41,4 +66,13 @@ async function readApiResponse(response, fallbackMessage) {
   return data;
 }
 
-export { API, formatPrice, getProductUom, readApiResponse };
+export {
+  API,
+  adminFetch,
+  clearAdminToken,
+  formatPrice,
+  getAdminToken,
+  getProductUom,
+  readApiResponse,
+  setAdminToken,
+};

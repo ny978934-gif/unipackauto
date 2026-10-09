@@ -1,0 +1,137 @@
+.admin-login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f8f7f4;
+}
+
+.admin-login-card {
+  width: min(100%, 420px);
+  padding: 36px;
+  background: #fff;
+  border: 1px solid #e8e4e1;
+  border-radius: 16px;
+  box-shadow: 0 18px 55px rgba(42, 25, 44, 0.1);
+}
+
+.admin-login-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.admin-login-brand img {
+  display: block;
+  width: min(100%, 220px);
+  height: 100px;
+  object-fit: contain;
+}
+
+.admin-login-card h1 {
+  margin: 0;
+  color: #222;
+  font-size: 26px;
+}
+
+.admin-login-intro {
+  margin: 8px 0 25px;
+  color: #777;
+  font-size: 14px;
+}
+
+.admin-login-field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.admin-login-field label {
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-login-field input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #d8d2d9;
+  border-radius: 8px;
+  color: #222;
+  font: inherit;
+}
+
+.admin-login-field input:focus {
+  border-color: #66116f;
+  outline: 3px solid rgba(102, 17, 111, 0.13);
+}
+
+.admin-login-error {
+  margin: 0 0 16px;
+  color: #a32626;
+  font-size: 14px;
+}
+
+.admin-login-setup-link,
+.admin-login-setup-closed {
+  margin: 20px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.admin-login-setup-link a,
+.admin-login-setup-closed a {
+  color: #66116f;
+  font-weight: 600;
+}
+
+.admin-login-setup-closed p {
+  margin: 0 0 12px;
+}
+
+.admin-login-submit {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 8px;
+  background: #66116f;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-login-submit:hover:not(:disabled) {
+  background: #4f0d56;
+}
+
+.admin-login-submit:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.admin-auth-check {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px;
+  color: #555;
+}
+
+.admin-auth-check button {
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #66116f;
+  color: white;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .admin-login-card {
+    padding: 28px 22px;
+  }
+}

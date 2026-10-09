@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { API } from "../spareApi";
+import { API, adminFetch } from "../spareApi";
 import "./AdminPages.css";
 
 const emptyForm = { name: "", slug: "", description: "" };
@@ -20,13 +20,13 @@ export default function Categories() {
   const [subcategorySearch, setSubcategorySearch] = useState("");
 
   const load = async (signal) => {
-    const response = await fetch(`${API}/api/spare/categories?type=${type}`, { signal });
+    const response = await adminFetch(`${API}/api/spare/categories?type=${type}`, { signal });
     if (!response.ok) throw new Error("Unable to load categories.");
     const data = await response.json();
     setCategories(Array.isArray(data) ? data : []);
     if (type === "sparepart") {
       try {
-        const subcategoryResponse = await fetch(`${API}/api/spare/subcategories`, { signal });
+        const subcategoryResponse = await adminFetch(`${API}/api/spare/subcategories`, { signal });
         if (!subcategoryResponse.ok) {
           setSubcategories([]);
           setSubcategoryApiAvailable(false);
@@ -79,7 +79,7 @@ export default function Categories() {
     try {
       const body = new FormData();
       Object.entries({ ...form, type }).forEach(([key, value]) => body.append(key, value));
-      const response = await fetch(
+      const response = await adminFetch(
         editingId
           ? `${API}/api/spare/categories/${editingId}`
           : `${API}/api/spare/categories`,
@@ -111,7 +111,7 @@ export default function Categories() {
   const remove = async (id) => {
     if (!window.confirm("Delete this category and all products assigned to it?")) return;
     try {
-      const response = await fetch(`${API}/api/spare/categories/${id}`, { method: "DELETE" });
+      const response = await adminFetch(`${API}/api/spare/categories/${id}`, { method: "DELETE" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || "Unable to delete category.");
       setCategories((items) => items.filter((item) => item._id !== id));
@@ -131,7 +131,7 @@ export default function Categories() {
     setLoading(true);
     setMessage("");
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         editingSubcategoryId
           ? `${API}/api/spare/subcategories/${editingSubcategoryId}`
           : `${API}/api/spare/subcategories`,
@@ -168,7 +168,7 @@ export default function Categories() {
   const removeSubcategory = async (id) => {
     if (!window.confirm("Delete this subcategory? Spare parts assigned to it will remain in their main category.")) return;
     try {
-      const response = await fetch(`${API}/api/spare/subcategories/${id}`, { method: "DELETE" });
+      const response = await adminFetch(`${API}/api/spare/subcategories/${id}`, { method: "DELETE" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || "Unable to delete subcategory.");
       setSubcategories((items) => items.filter((item) => item._id !== id));

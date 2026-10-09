@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { API } from "../spareApi";
+import { API, adminFetch } from "../spareApi";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -14,7 +14,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     let isMounted = true;
-    fetch(`${API}/api/stats`)
+    adminFetch(`${API}/api/stats`)
       .then((res) => {
         if (!res.ok) throw new Error("Could not fetch stats");
         return res.json();
@@ -46,7 +46,7 @@ const Dashboard = () => {
       <div className="dashboard-heading">
         <div>
           <h1>Dashboard</h1>
-          <p>Welcome to Unipack Auto Admin Panel — Live Database Inventory</p>
+          <p>Live database inventory and catalogue management.</p>
         </div>
       </div>
 

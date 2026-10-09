@@ -1,7 +1,15 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { clearAdminToken } from "../spareApi";
+import logo from "../assests/logo.jpeg";
 import "./AdminLayout.css";
 
 const AdminLayout = () => {
+  const navigate = useNavigate();
+  const logout = () => {
+    clearAdminToken();
+    navigate("/admin/login", { replace: true });
+  };
+
   return (
     <div className="admin-layout">
 
@@ -9,8 +17,7 @@ const AdminLayout = () => {
       <aside className="admin-sidebar">
 
         <div className="admin-logo">
-          <h2>UNIPACK</h2>
-          <span>ADMIN PANEL</span>
+          <img src={logo} alt="Unipack Auto logo" />
         </div>
 
         <nav className="admin-nav">
@@ -93,7 +100,7 @@ const AdminLayout = () => {
         <header className="admin-header">
 
           <div>
-            <h3>Admin Panel</h3>
+            <h3>Dashboard</h3>
             <p>Manage your spare parts and machine catalogues</p>
           </div>
 
@@ -104,6 +111,7 @@ const AdminLayout = () => {
               <strong>Admin</strong>
               <small>Administrator</small>
             </div>
+            <button className="admin-logout-btn" type="button" onClick={logout}>Log out</button>
           </div>
 
         </header>

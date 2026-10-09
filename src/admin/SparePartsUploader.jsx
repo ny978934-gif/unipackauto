@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { API, formatPrice, readApiResponse } from "../spareApi";
+import { API, adminFetch, formatPrice, readApiResponse } from "../spareApi";
 import "./AdminPages.css";
 import "./SparePartsUploader.css";
 
@@ -29,7 +29,7 @@ export default function SparePartsUploader() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${API}/api/spare/categories?type=sparepart`, { signal: controller.signal })
+    adminFetch(`${API}/api/spare/categories?type=sparepart`, { signal: controller.signal })
       .then((response) => readApiResponse(response, "Unable to load spare part categories."))
       .then((data) => {
         setCategories(Array.isArray(data) ? data : []);
@@ -55,7 +55,7 @@ export default function SparePartsUploader() {
       const formData = new FormData();
       formData.append("categoryId", selectedCategoryId);
       formData.append("file", selectedFile);
-      const response = await fetch(`${API}/api/spare-parts/upload-parse`, {
+      const response = await adminFetch(`${API}/api/spare-parts/upload-parse`, {
         method: "POST",
         body: formData,
       });
@@ -156,8 +156,8 @@ export default function SparePartsUploader() {
           />
           <small>
             {categoryId
-              ? "Accepted: .doc, .docx, .xls, .xlsx · Maximum 10 MB. Excel files import automatically from the sheet matching the selected category."
-              : "Select a main category and an Excel file will import automatically from its matching sheet."}
+              ? "Accepted: .doc, .docx, .xls, .xlsx · Maximum 10 MB. Excel files import automatically from the best matching table in any sheet."
+              : "Select a main category and an Excel file will import automatically from its best matching table."}
           </small>
           {file && <p className="sp-import-selected-file">Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)</p>}
         </div>
@@ -168,13 +168,13 @@ export default function SparePartsUploader() {
           <code>Price</code><code>Stock</code><code>UOM</code>
         </div>
         <p className="sp-import-help">
-          Excel sheets must be named after the selected category and use a header row with Part Name, Price, UOM, and Stock columns. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
+          Excel sheet names are ignored. The importer scans all sheets for a table with a Part Name column and imports its rows into the selected category; Price, UOM, and Stock columns are optional. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
         </p>
         <button className="primary-btn sp-import-submit-btn" type="submit" disabled={!categoryId || !file || uploading}>
           {uploading
             ? <><span className="sp-import-spinner" aria-hidden="true" /> Parsing and importing…</>
             : file && isExcelFile(file)
-              ? "Import matching Excel sheet"
+              ? "Import Excel file"
               : "Upload & import spare parts"}
         </button>
       </form>

@@ -13,6 +13,8 @@ import Categories from "./admin/Categories.jsx";
 import AdminProducts from "./admin/Products2.jsx";
 import Inquiry from "./admin/Inquiry.jsx";
 import SparePartsUploader from "./admin/SparePartsUploader.jsx";
+import AdminLogin from "./components/login.jsx";
+import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
 import Catalog from "./components/catalog.jsx";
 import "./components/UnifiedTheme.css";
 
@@ -57,13 +59,17 @@ function AppShell() {
           <Route path="/spare-parts/:categorySlug" element={<Products />} />
           <Route path="/spare-parts/:categorySlug/:productSlug" element={<ProductDetails />} />
           {/* Admin Portal — renders its own sidebar/header, no public nav */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="categories" element={<Categories />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="machines" element={<AdminProducts type="machine" />} />
-            <Route path="inquiries" element={<Inquiry />} />
-            <Route path="spare-parts-uploader" element={<SparePartsUploader />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/setup" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="categories" element={<Categories />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="machines" element={<AdminProducts type="machine" />} />
+              <Route path="inquiries" element={<Inquiry />} />
+              <Route path="spare-parts-uploader" element={<SparePartsUploader />} />
+            </Route>
           </Route>
           {/* Product Catalog */}
           <Route path="/catalog" element={<Catalog />} />
