@@ -9,6 +9,8 @@ const Dashboard = () => {
     products: 0,
     inquiries: 0,
     newInquiries: 0,
+    quoteRequests: 0,
+    newQuoteRequests: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -26,6 +28,8 @@ const Dashboard = () => {
             products: data.products || 0,
             inquiries: data.inquiries || 0,
             newInquiries: data.newInquiries || 0,
+            quoteRequests: data.quoteRequests || 0,
+            newQuoteRequests: data.newQuoteRequests || 0,
           });
         }
       })
@@ -75,6 +79,13 @@ const Dashboard = () => {
             <h2>{loading ? "..." : stats.newInquiries}</h2>
           </div>
         </div>
+        <div className="stat-card">
+          <div className="stat-icon orange">🧾</div>
+          <div>
+            <span>New Quote Requests</span>
+            <h2>{loading ? "..." : stats.newQuoteRequests}</h2>
+          </div>
+        </div>
       </div>
 
       {/* QUICK ACTIONS */}
@@ -118,6 +129,14 @@ const Dashboard = () => {
             <div>
               <h3>View Inquiries</h3>
               <p>{stats.inquiries} total · {stats.newInquiries} new customer messages</p>
+            </div>
+          </Link>
+
+          <Link to="/admin/quote-requests" className="quick-card">
+            <span>🧾</span>
+            <div>
+              <h3>Manage Quote Requests</h3>
+              <p>{stats.quoteRequests} total · {stats.newQuoteRequests} new machine and spare-part requests</p>
             </div>
           </Link>
         </div>

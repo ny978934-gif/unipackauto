@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./components/pages/Home.jsx";
+import GetQuote from "./components/pages/GetQuote.jsx";
 import SpareParts from "./components/pages/spareparts/SpareParts.jsx";
 import MachineProducts from "./components/pages/products/Products.jsx";
 import ProductDetails from "./components/pages/spareparts/ProductDetails.jsx";
@@ -12,6 +13,7 @@ import Dashboard from "./admin/Dashboard.jsx";
 import Categories from "./admin/Categories.jsx";
 import AdminProducts from "./admin/Products2.jsx";
 import Inquiry from "./admin/Inquiry.jsx";
+import QuoteRequests from "./admin/QuoteRequests.jsx";
 import SparePartsUploader from "./admin/SparePartsUploader.jsx";
 import AdminLogin from "./components/login.jsx";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
@@ -51,6 +53,7 @@ function AppShell() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/get-quote" element={<GetQuote />} />
           <Route path="/products" element={<MachineProducts />} />
           <Route path="/products/:categorySlug" element={<Products type="machine" />} />
           <Route path="/products/:categorySlug/:productSlug" element={<ProductDetails type="machine" />} />
@@ -68,6 +71,7 @@ function AppShell() {
               <Route path="products" element={<AdminProducts />} />
               <Route path="machines" element={<AdminProducts type="machine" />} />
               <Route path="inquiries" element={<Inquiry />} />
+              <Route path="quote-requests" element={<QuoteRequests />} />
               <Route path="spare-parts-uploader" element={<SparePartsUploader />} />
             </Route>
           </Route>

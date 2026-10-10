@@ -37,6 +37,25 @@ export default function ProductDetails({ type = "sparepart" }) {
   const image = product.image || product.images?.[0] || "";
   const categoryName = product.category?.name || categorySlug;
   const uom = getProductUom(product);
+  const quotePrefill = type === "machine"
+    ? {
+      quoteType: "machine",
+      machineType: categoryName,
+      model: product.name,
+    }
+    : {
+      quoteType: "sparePart",
+      part: {
+        machine: "",
+        partName: product.name,
+        itemCode: product.partCode || "",
+        quantity: "1",
+      },
+    };
+  const enquiryPrefill = {
+    productInterest: `${categoryName} — ${product.name}`,
+    message: `I would like more information about ${product.name}.`,
+  };
 
   return (
     <div className="product-details-page">
@@ -58,6 +77,14 @@ export default function ProductDetails({ type = "sparepart" }) {
             {product.price > 0 ? formatPrice(product.price) : "Price on Request"}
           </div>
           {product.description && <p className="product-description">{product.description}</p>}
+          <div className="product-detail-actions">
+            <Link to="/get-quote" state={{ quotePrefill }} className="product-quote-button">
+              Get a Quote
+            </Link>
+            <Link to="/#contact" state={{ enquiryPrefill }} className="product-enquiry-button">
+              Send Enquiry
+            </Link>
+          </div>
         </div>
       </section>
       {product.specifications?.length > 0 && (

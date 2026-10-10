@@ -103,7 +103,7 @@ export default function About() {
           </div>
 
           <div className="about__actions">
-            <Link to="/#contact" className="about__cta">
+            <Link to="/get-quote" className="about__cta">
               Get a Quote
               <svg
                 width="18"

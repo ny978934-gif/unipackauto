@@ -46,7 +46,7 @@ export default function Footer() {
             <li><Link to="/#partners">Channel Partners</Link></li>
             <li><Link to="/#contact">Contact Us</Link></li>
             <li><Link to="/catalog">Catalog</Link></li>
-            <li><Link to="/#contact">Get a Quote</Link></li>
+            <li><Link to="/get-quote">Get a Quote</Link></li>
           </ul>
         </div>
 

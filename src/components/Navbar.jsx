@@ -236,7 +236,7 @@ export default function Navbar() {
 
             <Link to="/catalog" className="nav-link" onClick={closeMenus}>Catalog</Link>
             <Link to="/#contact" className="nav-link" onClick={closeMenus}>Contact Us</Link>
-            <Link to="/#contact" className="btn-quote" onClick={closeMenus}>Get a Quote</Link>
+            <Link to="/get-quote" className="btn-quote" onClick={closeMenus}>Get a Quote</Link>
           </div>
 
           {/* Mobile Hamburger */}
@@ -323,7 +323,7 @@ export default function Navbar() {
 
             <Link to="/catalog" onClick={closeMenus}>Catalog</Link>
             <Link to="/#contact" onClick={closeMenus}>Contact Us</Link>
-            <Link to="/#contact" className="btn-quote-mobile" onClick={closeMenus}>
+            <Link to="/get-quote" className="btn-quote-mobile" onClick={closeMenus}>
               Get a Quote
             </Link>
           </div>

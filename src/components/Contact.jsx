@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "./Contact.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -12,8 +13,19 @@ const INITIAL_FORM = {
 };
 
 export default function Contact() {
+  const location = useLocation();
   const [form, setForm] = useState(INITIAL_FORM);
   const [status, setStatus] = useState({ state: "idle", message: "" });
+
+  useEffect(() => {
+    const prefill = location.state?.enquiryPrefill;
+    if (!prefill) return;
+    setForm((current) => ({
+      ...current,
+      productInterest: prefill.productInterest || current.productInterest,
+      message: prefill.message || current.message,
+    }));
+  }, [location.state]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
