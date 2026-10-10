@@ -8,24 +8,6 @@
   gap: 9px;
 }
 
-.quote-email-check {
-  margin-bottom: 18px;
-  padding: 13px 16px;
-  border-radius: 9px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.quote-email-check-success {
-  color: #35633d;
-  background: #edf6eb;
-}
-
-.quote-email-check-error {
-  color: #8f332b;
-  background: #fff0ed;
-}
-
 .quote-request-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

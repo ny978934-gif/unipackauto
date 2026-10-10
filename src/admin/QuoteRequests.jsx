@@ -24,7 +24,6 @@ export default function QuoteRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
-  const [emailCheck, setEmailCheck] = useState({ state: "idle", message: "" });
 
   const loadRequests = async (signal) => {
     setLoading(true);
@@ -85,18 +84,6 @@ export default function QuoteRequests() {
     }
   };
 
-  const checkEmailSetup = async () => {
-    setEmailCheck({ state: "loading", message: "" });
-    try {
-      const response = await adminFetch(`${API}/api/quotes/email-check`, { method: "POST" });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Email setup test failed.");
-      setEmailCheck({ state: "success", message: result.message });
-    } catch (checkError) {
-      setEmailCheck({ state: "error", message: checkError.message });
-    }
-  };
-
   const newCount = requests.filter((request) => request.status === "new").length;
 
   return (
@@ -107,9 +94,6 @@ export default function QuoteRequests() {
           <p>Review machine and spare-part quote submissions from your customers.</p>
         </div>
         <div className="quote-request-header-actions">
-          <button type="button" className="edit-btn" onClick={checkEmailSetup} disabled={emailCheck.state === "loading"}>
-            {emailCheck.state === "loading" ? "Testing email…" : "Test email setup"}
-          </button>
           <button type="button" className="primary-btn" onClick={() => loadRequests()} disabled={loading}>
             {loading ? "Refreshing…" : "Refresh"}
           </button>
@@ -122,11 +106,6 @@ export default function QuoteRequests() {
       </div>
 
       {error && <div className="quote-request-error" role="alert">{error}</div>}
-      {emailCheck.message && (
-        <div className={`quote-email-check quote-email-check-${emailCheck.state}`} role={emailCheck.state === "error" ? "alert" : "status"}>
-          {emailCheck.message}
-        </div>
-      )}
 
       <section className="admin-table-card quote-request-list">
         <div className="table-header">
@@ -213,7 +192,7 @@ export default function QuoteRequests() {
                     </a>
                   ) : <span>No attachment</span>}
                   <span className={`quote-email-status quote-email-status-${request.notificationStatus || "pending"}`}>
-                    Email {request.notificationStatus || "pending"}
+                    {request.notificationStatus === "sent" ? "SMTP accepted email" : `Email ${request.notificationStatus || "pending"}`}
                   </span>
                 </footer>
                 {request.notificationStatus === "failed" && request.notificationError && (
