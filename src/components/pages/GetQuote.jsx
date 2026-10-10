@@ -5,6 +5,8 @@ import "./GetQuote.css";
 
 const blankPart = () => ({
   machine: "",
+  categorySlug: "",
+  partId: "",
   partName: "",
   itemCode: "",
   quantity: "1",
@@ -40,23 +42,66 @@ export default function GetQuote() {
   const [attachment, setAttachment] = useState(null);
   const [status, setStatus] = useState({ state: "idle", message: "" });
   const [machineCategories, setMachineCategories] = useState([]);
+  const [spareCategories, setSpareCategories] = useState([]);
+  const [sparePartsByCategory, setSparePartsByCategory] = useState({});
   const formRef = useRef(null);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${API}/api/spare/categories?type=machine`, { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Machine categories could not be loaded.");
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) setMachineCategories(data);
+    Promise.all([
+      fetch(`${API}/api/spare/categories?type=machine`, { signal: controller.signal }),
+      fetch(`${API}/api/spare/categories?type=sparepart`, { signal: controller.signal }),
+    ])
+      .then(async ([machineResponse, spareResponse]) => {
+        if (!machineResponse.ok || !spareResponse.ok) {
+          throw new Error("Quote categories could not be loaded.");
+        }
+        const [machineData, spareData] = await Promise.all([
+          machineResponse.json(),
+          spareResponse.json(),
+        ]);
+        if (Array.isArray(machineData)) setMachineCategories(machineData);
+        if (Array.isArray(spareData)) setSpareCategories(spareData);
       })
       .catch((error) => {
-        if (error.name !== "AbortError") console.error("Unable to load machine categories:", error);
+        if (error.name !== "AbortError") console.error("Unable to load quote categories:", error);
       });
     return () => controller.abort();
   }, []);
+
+  const selectedCategorySlugs = [...new Set(parts.map((part) => part.categorySlug).filter(Boolean))].join(",");
+
+  useEffect(() => {
+    if (!selectedCategorySlugs) return undefined;
+    const controller = new AbortController();
+    const slugs = selectedCategorySlugs.split(",").filter(
+      (slug) => !Object.prototype.hasOwnProperty.call(sparePartsByCategory, slug)
+    );
+    if (!slugs.length) return undefined;
+
+    Promise.all(slugs.map(async (slug) => {
+      try {
+        const response = await fetch(
+          `${API}/api/products?category=${encodeURIComponent(slug)}&type=sparepart`,
+          { signal: controller.signal }
+        );
+        if (!response.ok) throw new Error(`Spare parts could not be loaded for ${slug}.`);
+        const products = await response.json();
+        return [slug, Array.isArray(products) ? products : []];
+      } catch (error) {
+        if (controller.signal.aborted) throw error;
+        console.error(`Unable to load spare parts for ${slug}:`, error);
+        return [slug, null];
+      }
+    }))
+      .then((entries) => {
+        setSparePartsByCategory((current) => ({ ...current, ...Object.fromEntries(entries) }));
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") console.error("Unable to load category spare parts:", error);
+      });
+    return () => controller.abort();
+  }, [selectedCategorySlugs, sparePartsByCategory]);
 
   useEffect(() => {
     const prefill = location.state?.quotePrefill;
@@ -76,6 +121,7 @@ export default function GetQuote() {
       setQuoteType("sparePart");
       setParts((current) => {
         const part = { ...blankPart(), ...prefill.part };
+        part.categorySlug = prefill.categorySlug || part.categorySlug;
         const alreadyAdded = current.some((existing) =>
           existing.partName === part.partName && existing.itemCode === part.itemCode
         );
@@ -91,9 +137,39 @@ export default function GetQuote() {
 
   const updatePart = (index, event) => {
     const { name, value } = event.target;
-    setParts((current) => current.map((part, partIndex) =>
-      partIndex === index ? { ...part, [name]: value } : part
-    ));
+    setParts((current) => current.map((part, partIndex) => {
+      if (partIndex !== index) return part;
+      if (name === "categorySlug") {
+        const category = spareCategories.find((item) => item.slug === value);
+        return {
+          ...part,
+          categorySlug: value,
+          machine: category?.name || "",
+          partId: "",
+          partName: "",
+          itemCode: "",
+        };
+      }
+      if (name === "partId") {
+        const selectedPart = (sparePartsByCategory[part.categorySlug] || [])
+          .find((item) => item._id === value);
+        return {
+          ...part,
+          partId: value,
+          partName: selectedPart?.name || "",
+          itemCode: selectedPart?.partCode || "",
+        };
+      }
+      return { ...part, [name]: value };
+    }));
+  };
+
+  const retrySpareParts = (categorySlug) => {
+    setSparePartsByCategory((current) => {
+      const next = { ...current };
+      delete next[categorySlug];
+      return next;
+    });
   };
 
   const updateMachine = (event) => {
@@ -212,16 +288,57 @@ export default function GetQuote() {
                       <div className="quote-fields-grid">
                         <label className="quote-field quote-field-wide">
                           <span>Machine category / name <b>*</b></span>
-                          <input
-                            name="machine"
-                            list="quote-machine-category-list"
-                            value={part.machine}
+                          <select
+                            name="categorySlug"
+                            value={part.categorySlug}
                             onChange={(event) => updatePart(index, event)}
-                            placeholder="Select or enter machine category and name"
                             required
-                          />
+                          >
+                            <option value="">Select a machine category</option>
+                            {spareCategories.map((category) => (
+                              <option key={category._id || category.slug} value={category.slug}>
+                                {category.name}
+                              </option>
+                            ))}
+                          </select>
                         </label>
-                        <Field label="Spare part name" name="partName" value={part.partName} onChange={(event) => updatePart(index, event)} placeholder="Name of the part" required />
+                        <label className="quote-field quote-field-wide">
+                          <span>Spare part name <b>*</b></span>
+                          <select
+                            name="partId"
+                            value={part.partId}
+                            onChange={(event) => updatePart(index, event)}
+                            disabled={!part.categorySlug || !Array.isArray(sparePartsByCategory[part.categorySlug])}
+                            required
+                          >
+                            <option value="">
+                              {!part.categorySlug
+                                ? "Select a machine category first"
+                                : sparePartsByCategory[part.categorySlug] === null
+                                ? "Could not load spare parts"
+                                : !sparePartsByCategory[part.categorySlug]
+                                  ? "Loading spare parts…"
+                                  : "Select a spare part"}
+                            </option>
+                            {(sparePartsByCategory[part.categorySlug] || []).map((sparePart) => (
+                              <option key={sparePart._id} value={sparePart._id}>
+                                {sparePart.name}{sparePart.partCode ? ` · ${sparePart.partCode}` : ""}
+                              </option>
+                            ))}
+                          </select>
+                          {part.categorySlug && sparePartsByCategory[part.categorySlug] === null && (
+                            <button
+                              className="quote-retry-parts"
+                              type="button"
+                              onClick={() => retrySpareParts(part.categorySlug)}
+                            >
+                              Retry loading spare parts
+                            </button>
+                          )}
+                          {part.categorySlug && sparePartsByCategory[part.categorySlug]?.length === 0 && (
+                            <small>No spare parts are listed in this category.</small>
+                          )}
+                        </label>
                         <Field label="Item code" name="itemCode" value={part.itemCode} onChange={(event) => updatePart(index, event)} placeholder="If known" />
                         <Field label="Quantity" name="quantity" type="number" min="1" max="100000" value={part.quantity} onChange={(event) => updatePart(index, event)} required />
                       </div>

@@ -234,6 +234,7 @@
 }
 
 .quote-field input,
+.quote-field select,
 .quote-field textarea {
   width: 100%;
   min-height: 46px;
@@ -260,9 +261,28 @@
 }
 
 .quote-field input:focus,
+.quote-field select:focus,
 .quote-field textarea:focus {
   border-color: #b99a6a;
   box-shadow: 0 0 0 3px rgba(227, 200, 155, 0.22);
+}
+
+.quote-field select:disabled {
+  color: #928879;
+  cursor: wait;
+}
+
+.quote-retry-parts {
+  justify-self: start;
+  padding: 0;
+  color: #805b2d;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
 }
 
 .quote-field-wide {

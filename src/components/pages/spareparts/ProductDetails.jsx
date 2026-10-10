@@ -46,7 +46,9 @@ export default function ProductDetails({ type = "sparepart" }) {
     : {
       quoteType: "sparePart",
       part: {
-        machine: "",
+        machine: categoryName,
+        categorySlug,
+        partId: product._id,
         partName: product.name,
         itemCode: product.partCode || "",
         quantity: "1",
