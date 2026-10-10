@@ -24,6 +24,7 @@ export default function QuoteRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
+  const [emailCheck, setEmailCheck] = useState({ state: "idle", message: "" });
 
   const loadRequests = async (signal) => {
     setLoading(true);
@@ -84,6 +85,18 @@ export default function QuoteRequests() {
     }
   };
 
+  const checkEmailSetup = async () => {
+    setEmailCheck({ state: "loading", message: "" });
+    try {
+      const response = await adminFetch(`${API}/api/quotes/email-check`, { method: "POST" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Email setup test failed.");
+      setEmailCheck({ state: "success", message: result.message });
+    } catch (checkError) {
+      setEmailCheck({ state: "error", message: checkError.message });
+    }
+  };
+
   const newCount = requests.filter((request) => request.status === "new").length;
 
   return (
@@ -93,9 +106,14 @@ export default function QuoteRequests() {
           <h1>Quote requests</h1>
           <p>Review machine and spare-part quote submissions from your customers.</p>
         </div>
-        <button type="button" className="primary-btn" onClick={() => loadRequests()} disabled={loading}>
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
+        <div className="quote-request-header-actions">
+          <button type="button" className="edit-btn" onClick={checkEmailSetup} disabled={emailCheck.state === "loading"}>
+            {emailCheck.state === "loading" ? "Testing email…" : "Test email setup"}
+          </button>
+          <button type="button" className="primary-btn" onClick={() => loadRequests()} disabled={loading}>
+            {loading ? "Refreshing…" : "Refresh"}
+          </button>
+        </div>
       </div>
 
       <div className="quote-request-summary">
@@ -104,6 +122,11 @@ export default function QuoteRequests() {
       </div>
 
       {error && <div className="quote-request-error" role="alert">{error}</div>}
+      {emailCheck.message && (
+        <div className={`quote-email-check quote-email-check-${emailCheck.state}`} role={emailCheck.state === "error" ? "alert" : "status"}>
+          {emailCheck.message}
+        </div>
+      )}
 
       <section className="admin-table-card quote-request-list">
         <div className="table-header">
@@ -193,6 +216,9 @@ export default function QuoteRequests() {
                     Email {request.notificationStatus || "pending"}
                   </span>
                 </footer>
+                {request.notificationStatus === "failed" && request.notificationError && (
+                  <p className="quote-request-email-error" role="note">{request.notificationError}</p>
+                )}
               </article>
             ))}
           </div>

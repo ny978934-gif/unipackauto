@@ -2,6 +2,30 @@
   align-items: center;
 }
 
+.quote-request-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.quote-email-check {
+  margin-bottom: 18px;
+  padding: 13px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.quote-email-check-success {
+  color: #35633d;
+  background: #edf6eb;
+}
+
+.quote-email-check-error {
+  color: #8f332b;
+  background: #fff0ed;
+}
+
 .quote-request-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -245,9 +269,27 @@
   color: #a04735;
 }
 
+.quote-request-email-error {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  color: #8f332b;
+  background: #fff6f3;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 @media (max-width: 650px) {
   .quote-requests-title {
     align-items: flex-start;
+  }
+
+  .quote-request-header-actions {
+    width: 100%;
+  }
+
+  .quote-request-header-actions > button {
+    flex: 1;
   }
 
   .quote-request-summary,
