@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { API, adminFetch, formatPrice, getProductUom } from "../spareApi";
 import "./AdminPages.css";
 
@@ -7,7 +7,9 @@ const emptyProduct = {
   subcategoryId: "",
   name: "",
   slug: "",
+  partCode: "",
   price: "",
+  stock: "",
   uom: "",
   imageUrl: "",
   description: "",
@@ -24,8 +26,11 @@ export default function Products({ type = "sparepart" }) {
   const [images, setImages] = useState([]);
   const [specifications, setSpecifications] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const formCardRef = useRef(null);
+  const nameInputRef = useRef(null);
   const itemLabel = type === "machine" ? "machine" : "spare part";
   const collectionLabel = type === "machine" ? "Products / Machines" : "Spare Parts";
 
@@ -73,12 +78,12 @@ export default function Products({ type = "sparepart" }) {
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return products;
-    return products.filter((product) =>
-      [product.name, product.category?.name, product.subcategory?.name, getProductUom(product)]
-        .some((value) => String(value || "").toLowerCase().includes(query))
-    );
-  }, [products, searchQuery]);
+    return products.filter((product) => {
+      if (selectedCategoryId && (product.category?._id || product.category) !== selectedCategoryId) return false;
+      return !query || [product.name, product.partCode, product.category?.name, product.subcategory?.name, getProductUom(product)]
+        .some((value) => String(value || "").toLowerCase().includes(query));
+    });
+  }, [products, searchQuery, selectedCategoryId]);
 
   const resetForm = () => {
     setForm({ ...emptyProduct });
@@ -108,6 +113,7 @@ export default function Products({ type = "sparepart" }) {
         throw new Error("The server response is missing the UOM value. This product may have been saved without it. Update and redeploy the backend, then edit the existing product to add its UOM.");
       }
       setMessage(editingId ? `${itemLabel} updated successfully.` : `${itemLabel} saved successfully.`);
+      setSelectedCategoryId(form.categoryId);
       resetForm();
       await load();
     } catch (error) {
@@ -124,7 +130,9 @@ export default function Products({ type = "sparepart" }) {
       subcategoryId: product.subcategory?._id || product.subcategory || "",
       name: product.name || "",
       slug: product.slug || "",
+      partCode: product.partCode || "",
       price: product.price ?? "",
+      stock: product.stock ?? "",
       uom: getProductUom(product),
       imageUrl: product.image || product.images?.[0] || "",
       description: product.description || "",
@@ -133,8 +141,15 @@ export default function Products({ type = "sparepart" }) {
     setSpecifications(product.specifications || []);
     setImages([]);
     setMessage("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setSelectedCategoryId(product.category?._id || product.category || "");
   };
+
+  useEffect(() => {
+    if (!editingId) return;
+    formCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const focusTimer = window.setTimeout(() => nameInputRef.current?.focus(), 350);
+    return () => window.clearTimeout(focusTimer);
+  }, [editingId]);
 
   const remove = async (id) => {
     if (!window.confirm(`Delete this ${itemLabel}?`)) return;
@@ -150,6 +165,39 @@ export default function Products({ type = "sparepart" }) {
     }
   };
 
+  const removeCategoryParts = async () => {
+    const category = categories.find((item) => item._id === selectedCategoryId);
+    if (!category) {
+      setMessage("Select a valid spare-part category before deleting its parts.");
+      return;
+    }
+    const categoryProducts = products.filter(
+      (product) => (product.category?._id || product.category) === selectedCategoryId
+    );
+    if (!categoryProducts.length) {
+      setMessage(`There are no spare parts to delete in ${category.name}.`);
+      return;
+    }
+    if (!window.confirm(`Permanently delete all ${categoryProducts.length} spare part(s) in "${category.name}"? Parts in other categories will not be affected.`)) return;
+
+    setLoading(true);
+    setMessage("");
+    try {
+      const response = await adminFetch(`${API}/api/products/category/${selectedCategoryId}`, {
+        method: "DELETE",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Unable to delete parts in this category.");
+      if (editingId && categoryProducts.some((product) => product._id === editingId)) resetForm();
+      setMessage(`${data.deletedCount} spare part(s) deleted from ${category.name}.`);
+      await load();
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }));
 
   return (
@@ -162,7 +210,7 @@ export default function Products({ type = "sparepart" }) {
         </p>
       )}
 
-      <div className="admin-form-card">
+      <div className="admin-form-card" ref={formCardRef}>
         <h2>{editingId ? `Edit ${itemLabel}` : `Add ${itemLabel}`}</h2>
         <form onSubmit={submit}>
           <div className="form-row">
@@ -175,7 +223,7 @@ export default function Products({ type = "sparepart" }) {
             </div>
             <div className="form-group">
               <label htmlFor={`product-name-${type}`}>{type === "machine" ? "Product name" : "Spare part name"} *</label>
-              <input id={`product-name-${type}`} required value={form.name} onChange={(event) => updateField("name", event.target.value)} />
+              <input ref={nameInputRef} id={`product-name-${type}`} required value={form.name} onChange={(event) => updateField("name", event.target.value)} />
             </div>
           </div>
           {type === "sparepart" && subcategoryApiAvailable && (
@@ -190,10 +238,22 @@ export default function Products({ type = "sparepart" }) {
             </div>
           )}
           <div className="form-row">
+            {type === "sparepart" && (
+              <div className="form-group">
+                <label htmlFor="product-part-code">Item code</label>
+                <input id="product-part-code" value={form.partCode} onChange={(event) => updateField("partCode", event.target.value)} />
+              </div>
+            )}
             <div className="form-group">
               <label htmlFor={`product-price-${type}`}>Price (INR)</label>
               <input id={`product-price-${type}`} type="number" min="0" step="0.01" value={form.price} onChange={(event) => updateField("price", event.target.value)} />
             </div>
+            {type === "sparepart" && (
+              <div className="form-group">
+                <label htmlFor="product-stock">Stock quantity</label>
+                <input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(event) => updateField("stock", event.target.value)} />
+              </div>
+            )}
             {type === "sparepart" && (
               <div className="form-group">
                 <label htmlFor="product-uom">UOM (Unit of Measure)</label>
@@ -237,25 +297,48 @@ export default function Products({ type = "sparepart" }) {
       </div>
 
       <div className="admin-table-card">
-        <div className="table-header"><h2>{collectionLabel}</h2><span>{filteredProducts.length} of {products.length}</span></div>
+        <div className="table-header admin-products-table-header">
+          <h2>{collectionLabel}</h2>
+          <div className="admin-products-actions">
+            <span>{filteredProducts.length} of {products.length}</span>
+            {type === "sparepart" && selectedCategoryId && (
+              <button type="button" className="delete-btn" onClick={removeCategoryParts} disabled={loading}>
+                Delete All Parts in Category
+              </button>
+            )}
+          </div>
+        </div>
         <div className="admin-table-search">
-          <label htmlFor={`product-search-${type}`}>Search by name, category, subcategory, or UOM</label>
+          <label htmlFor={`product-category-filter-${type}`}>Show category</label>
+          <select
+            id={`product-category-filter-${type}`}
+            value={selectedCategoryId}
+            onChange={(event) => setSelectedCategoryId(event.target.value)}
+          >
+            <option value="">All categories</option>
+            {categories.map((category) => <option key={category._id} value={category._id}>{category.name}</option>)}
+          </select>
+        </div>
+        <div className="admin-table-search">
+          <label htmlFor={`product-search-${type}`}>Search by name, item code, category, subcategory, or UOM</label>
           <input id={`product-search-${type}`} type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search catalogue..." />
         </div>
         <div className="table-wrapper">
           <table>
-            <thead><tr><th>Name</th><th>Machine name</th>{type === "sparepart" && <><th>Subcategory</th><th>UOM</th></>}<th>Price</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Name</th><th>Machine name</th>{type === "sparepart" && <><th>Item code</th><th>Subcategory</th><th>UOM</th><th>Stock</th></>}<th>Price</th><th>Actions</th></tr></thead>
             <tbody>
               {filteredProducts.map((item) => (
                 <tr key={item._id}>
                   <td>{item.name}</td><td>{item.category?.name || "—"}</td>
+                  {type === "sparepart" && <td>{item.partCode || "—"}</td>}
                   {type === "sparepart" && <td>{item.subcategory?.name || "—"}</td>}
                   {type === "sparepart" && <td>{getProductUom(item) || "—"}</td>}
+                  {type === "sparepart" && <td>{item.stock ?? 0}</td>}
                   <td>{formatPrice(item.price)}</td>
                   <td><button type="button" className="edit-btn" onClick={() => edit(item)}>Edit</button><button type="button" className="delete-btn" onClick={() => remove(item._id)}>Delete</button></td>
                 </tr>
               ))}
-              {!filteredProducts.length && <tr><td colSpan={type === "sparepart" ? 6 : 4}>{products.length ? "No items match your search." : "No items in this catalogue."}</td></tr>}
+              {!filteredProducts.length && <tr><td colSpan={type === "sparepart" ? 8 : 4}>{products.length ? "No items match this category or search." : "No items in this catalogue."}</td></tr>}
             </tbody>
           </table>
         </div>

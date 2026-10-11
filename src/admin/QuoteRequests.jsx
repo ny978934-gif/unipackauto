@@ -24,6 +24,8 @@ export default function QuoteRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
+  const [sendingId, setSendingId] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
 
   const loadRequests = async (signal) => {
     setLoading(true);
@@ -66,6 +68,7 @@ export default function QuoteRequests() {
   const updateStatus = async (requestId, status) => {
     setUpdatingId(requestId);
     setError("");
+    setActionMessage("");
     try {
       const response = await adminFetch(`${API}/api/quotes/${requestId}/status`, {
         method: "PATCH",
@@ -81,6 +84,34 @@ export default function QuoteRequests() {
       setError(updateError.message);
     } finally {
       setUpdatingId("");
+    }
+  };
+
+  const sendQuotation = async (request) => {
+    if (!window.confirm(`Send the current catalogue price quotation to ${request.email}?`)) return;
+    setSendingId(request._id);
+    setError("");
+    setActionMessage("");
+    try {
+      const response = await adminFetch(`${API}/api/quotes/${request._id}/send-quotation`, {
+        method: "POST",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to send quotation.");
+      setRequests((current) => current.map((item) =>
+        item._id === request._id ? result.request : item
+      ));
+      const total = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(result.totals.grossTotalCents / 100);
+      setActionMessage(`Quotation sent to ${request.email}. Gross total: ${total}.`);
+    } catch (sendError) {
+      setError(sendError.message);
+    } finally {
+      setSendingId("");
     }
   };
 
@@ -106,6 +137,7 @@ export default function QuoteRequests() {
       </div>
 
       {error && <div className="quote-request-error" role="alert">{error}</div>}
+      {actionMessage && <div className="quote-request-success" role="status">{actionMessage}</div>}
 
       <section className="admin-table-card quote-request-list">
         <div className="table-header">
@@ -194,7 +226,22 @@ export default function QuoteRequests() {
                   <span className={`quote-email-status quote-email-status-${request.notificationStatus || "pending"}`}>
                     {request.notificationStatus === "sent" ? "SMTP accepted email" : `Email ${request.notificationStatus || "pending"}`}
                   </span>
+                  {request.quoteType === "sparePart" && (
+                    <button
+                      type="button"
+                      className="primary-btn quote-send-button"
+                      disabled={sendingId === request._id || updatingId === request._id}
+                      onClick={() => sendQuotation(request)}
+                    >
+                      {sendingId === request._id ? "Sending quotation…" : request.quotation?.sentAt ? "Resend quotation" : "Send quotation"}
+                    </button>
+                  )}
                 </footer>
+                {request.quotation?.sentAt && (
+                  <p className="quote-request-message">
+                    Last quotation total (including GST): ₹{(request.quotation.grossTotalCents / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                )}
                 {request.notificationStatus === "failed" && request.notificationError && (
                   <p className="quote-request-email-error" role="note">{request.notificationError}</p>
                 )}

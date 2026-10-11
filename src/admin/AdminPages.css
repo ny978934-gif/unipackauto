@@ -134,6 +134,14 @@
   font-size: 13px;
 }
 
+.admin-products-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .admin-table-search {
   display: grid;
   gap: 7px;
@@ -147,7 +155,8 @@
   font-weight: 600;
 }
 
-.admin-table-search input {
+.admin-table-search input,
+.admin-table-search select {
   box-sizing: border-box;
   width: 100%;
   max-width: 480px;
@@ -270,6 +279,16 @@ code {
     align-items: flex-start;
     gap: 15px;
     flex-direction: column;
+  }
+
+  .admin-products-table-header {
+    align-items: flex-start;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .admin-products-actions {
+    justify-content: flex-start;
   }
 
 }

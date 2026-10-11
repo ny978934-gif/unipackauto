@@ -46,6 +46,16 @@
   border-radius: 9px;
 }
 
+.quote-request-success {
+  margin-bottom: 18px;
+  padding: 13px 16px;
+  color: #35633d;
+  background: #edf6eb;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .quote-request-filters {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
@@ -251,6 +261,10 @@
   color: #a04735;
 }
 
+.quote-send-button {
+  margin-left: auto;
+}
+
 .quote-request-email-error {
   margin: 10px 0 0;
   padding: 10px 12px;
@@ -272,6 +286,15 @@
 
   .quote-request-header-actions > button {
     flex: 1;
+  }
+
+  .quote-request-card-foot {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quote-send-button {
+    margin-left: 0;
   }
 
   .quote-request-summary,
