@@ -96,6 +96,12 @@ export default function Navbar() {
     setMachinesOpen(false);
   };
 
+  const sortedSpareCategories = [...spareCategories].sort((a, b) =>
+    String(a?.name ?? "").localeCompare(String(b?.name ?? ""), undefined, {
+      sensitivity: "base",
+    })
+  );
+
   return (
     <header className={`header-wrapper ${scrolled ? "is-sticky" : ""}`}>
       {/* Top Contact Bar */}
@@ -176,7 +182,7 @@ export default function Navbar() {
                 >
                   All Spare Parts
                 </Link>
-                {spareCategories.map((cat) => (
+                {sortedSpareCategories.map((cat) => (
                   <Link
                     key={cat._id || cat.slug}
                     to={`/spare-parts/${cat.slug}`}
@@ -279,7 +285,7 @@ export default function Navbar() {
               {spareOpen && (
                 <div className="mobile-spare-links" id="mobile-spare-menu">
                   <Link to="/spare-parts" onClick={closeMenus}>All Spare Parts</Link>
-                  {spareCategories.map((cat) => (
+                  {sortedSpareCategories.map((cat) => (
                     <Link
                       key={cat._id || cat.slug}
                       to={`/spare-parts/${cat.slug}`}
