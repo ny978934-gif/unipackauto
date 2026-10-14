@@ -120,10 +120,15 @@ export default function GetQuote() {
     if (prefill.quoteType === "sparePart" && prefill.part) {
       setQuoteType("sparePart");
       setParts((current) => {
-        const part = { ...blankPart(), ...prefill.part };
+        const part = {
+          ...blankPart(),
+          ...prefill.part,
+          // honour quantity from prefill (e.g. chosen on product details page)
+          quantity: String(Number(prefill.part.quantity) > 0 ? prefill.part.quantity : 1),
+        };
         part.categorySlug = prefill.categorySlug || part.categorySlug;
-        const alreadyAdded = current.some((existing) =>
-          existing.partName === part.partName && existing.itemCode === part.itemCode
+        const alreadyAdded = current.some(
+          (existing) => existing.partName === part.partName && existing.itemCode === part.itemCode
         );
         if (alreadyAdded) return current;
         return current.length === 1 && !current[0].partName ? [part] : [...current, part];

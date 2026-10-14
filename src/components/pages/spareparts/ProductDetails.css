@@ -161,40 +161,119 @@
   margin: 25px 0;
 }
 
+/* ── Quantity selector ── */
+
+.product-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0 4px;
+}
+
+.product-qty-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #172033;
+  white-space: nowrap;
+}
+
+.product-qty-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid #c8cfd9;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 44px;
+  background: #fff;
+}
+
+.qty-btn {
+  width: 44px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  color: #4a3f2f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease;
+  flex-shrink: 0;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: #f5efe4;
+}
+
+.qty-btn:disabled {
+  color: #bbb;
+  cursor: not-allowed;
+}
+
+.qty-input {
+  width: 56px;
+  height: 100%;
+  border: none;
+  border-left: 1.5px solid #c8cfd9;
+  border-right: 1.5px solid #c8cfd9;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #172033;
+  background: #fff;
+  outline: none;
+  -moz-appearance: textfield;
+  padding: 0;
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Action buttons ── */
+
 .product-detail-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 20px;
 }
 
-.product-detail-actions a {
+.product-quote-button,
+.product-enquiry-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 46px;
-  padding: 11px 19px;
-  border: 1px solid #4a3f2f;
+  padding: 11px 22px;
   border-radius: 9px;
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
+  cursor: pointer;
   transition: background 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
 .product-quote-button {
   color: #fff;
   background: #4a3f2f;
+  border: 1px solid #4a3f2f;
 }
 
 .product-quote-button:hover {
   background: #2a231a;
+  border-color: #2a231a;
   transform: translateY(-1px);
 }
 
 .product-enquiry-button {
   color: #4a3f2f;
   background: #fff;
+  border: 1px solid #4a3f2f;
 }
 
 .product-enquiry-button:hover {
