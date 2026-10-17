@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { QuoteCartProvider } from "./context/QuoteCartContext";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./components/pages/Home.jsx";
@@ -87,8 +88,10 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <HashScroll />
-          <AppShell />
+          <QuoteCartProvider>
+            <HashScroll />
+            <AppShell />
+          </QuoteCartProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

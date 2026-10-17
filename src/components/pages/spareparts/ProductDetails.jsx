@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { API, formatPrice, getProductUom } from "../../../spareApi";
 import { useAuth } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
+import { useQuoteCart } from "../../../context/QuoteCartContext";
 import logo from "../../../assests/logo.jpeg";
 import CloudinaryImage from "./CloudinaryImage";
 import "./ProductDetails.css";
