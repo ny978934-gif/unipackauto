@@ -75,6 +75,8 @@ export default function CartPage() {
       partId:   item.product,
       partName: item.name,
       itemCode: item.partCode || "",
+      machine: item.machine || "",
+      categorySlug: item.categorySlug || "",
       quantity: String(item.quantity),
     }));
     navigate("/get-quote", {

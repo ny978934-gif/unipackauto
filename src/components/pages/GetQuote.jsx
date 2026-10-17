@@ -117,21 +117,36 @@ export default function GetQuote() {
       return;
     }
 
-    if (prefill.quoteType === "sparePart" && prefill.part) {
+    const prefilledParts = Array.isArray(prefill.parts)
+      ? prefill.parts
+      : prefill.part
+        ? [prefill.part]
+        : [];
+
+    if (prefill.quoteType === "sparePart" && prefilledParts.length > 0) {
       setQuoteType("sparePart");
       setParts((current) => {
-        const part = {
+        const incoming = prefilledParts.slice(0, 30).map((prefilledPart) => ({
           ...blankPart(),
-          ...prefill.part,
-          // honour quantity from prefill (e.g. chosen on product details page)
-          quantity: String(Number(prefill.part.quantity) > 0 ? prefill.part.quantity : 1),
-        };
-        part.categorySlug = prefill.categorySlug || part.categorySlug;
-        const alreadyAdded = current.some(
-          (existing) => existing.partName === part.partName && existing.itemCode === part.itemCode
-        );
-        if (alreadyAdded) return current;
-        return current.length === 1 && !current[0].partName ? [part] : [...current, part];
+          ...prefilledPart,
+          quantity: String(
+            Number(prefilledPart.quantity) > 0 ? prefilledPart.quantity : 1
+          ),
+          categorySlug: prefill.categorySlug || prefilledPart.categorySlug || "",
+        }));
+        const hasOnlyBlankPart = current.length === 1 && !current[0].partName;
+        if (hasOnlyBlankPart) return incoming;
+
+        const merged = [...current];
+        incoming.forEach((part) => {
+          const alreadyAdded = merged.some(
+            (existing) => part.partId
+              ? existing.partId === part.partId
+              : existing.partName === part.partName && existing.itemCode === part.itemCode
+          );
+          if (!alreadyAdded && merged.length < 30) merged.push(part);
+        });
+        return merged;
       });
     }
   }, [location.state]);
