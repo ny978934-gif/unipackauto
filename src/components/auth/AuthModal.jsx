@@ -187,7 +187,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
                   onClick={() => setShowLoginPwd((v) => !v)}
                   aria-label={showLoginPwd ? "Hide password" : "Show password"}
                 >
-                  {showLoginPwd ? "🙈" : "👁"}
+                  {showLoginPwd ? "👁" : "👁"}
                 </button>
               </div>
             </div>
