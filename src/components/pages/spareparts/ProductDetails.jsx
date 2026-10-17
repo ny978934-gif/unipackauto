@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { API, formatPrice, getProductUom } from "../../../spareApi";
+import { useAuth } from "../../../context/AuthContext";
+import { useCart } from "../../../context/CartContext";
 import logo from "../../../assests/logo.jpeg";
 import CloudinaryImage from "./CloudinaryImage";
 import "./ProductDetails.css";
@@ -8,12 +10,17 @@ import "./ProductDetails.css";
 export default function ProductDetails({ type = "sparepart" }) {
   const { categorySlug, productSlug } = useParams();
   const navigate = useNavigate();
+  const { user }       = useAuth();
+  const { addToCart }  = useCart();
   const catalogPath  = type === "machine" ? "/products"    : "/spare-parts";
   const catalogLabel = type === "machine" ? "Products / Machines" : "Spare Parts";
 
-  const [product,  setProduct]  = useState(null);
-  const [state,    setState]    = useState("loading");
-  const [quantity, setQuantity] = useState(1);
+  const [product,       setProduct]       = useState(null);
+  const [state,         setState]         = useState("loading");
+  const [quantity,      setQuantity]      = useState(1);
+  const [cartStatus,    setCartStatus]    = useState("idle"); // idle | loading | added | error
+  const [cartMessage,   setCartMessage]   = useState("");
+  const [showAuthHint,  setShowAuthHint]  = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -73,6 +80,27 @@ export default function ProductDetails({ type = "sparepart" }) {
 
   const handleAddToQuote = () => {
     navigate("/get-quote", { state: { quotePrefill: buildQuotePrefill(quantity) } });
+  };
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      // Prompt login — dispatch an event the Navbar AuthModal can listen to
+      setShowAuthHint(true);
+      setTimeout(() => setShowAuthHint(false), 4000);
+      return;
+    }
+    setCartStatus("loading");
+    setCartMessage("");
+    try {
+      await addToCart(product._id, quantity);
+      setCartStatus("added");
+      setCartMessage(`${quantity} × ${product.name} added to cart.`);
+      setTimeout(() => { setCartStatus("idle"); setCartMessage(""); }, 3000);
+    } catch (err) {
+      setCartStatus("error");
+      setCartMessage(err.message || "Could not add to cart.");
+      setTimeout(() => { setCartStatus("idle"); setCartMessage(""); }, 4000);
+    }
   };
 
   const dec = () => setQuantity((q) => Math.max(1, q - 1));
@@ -152,6 +180,22 @@ export default function ProductDetails({ type = "sparepart" }) {
 
           {/* ── Action buttons ── */}
           <div className="product-detail-actions">
+            {/* Add to Cart — only for spare parts */}
+            {type === "sparepart" && (
+              <button
+                type="button"
+                className={`product-cart-button ${cartStatus === "loading" ? "product-cart-button--loading" : ""} ${cartStatus === "added" ? "product-cart-button--added" : ""}`}
+                onClick={handleAddToCart}
+                disabled={cartStatus === "loading"}
+                aria-live="polite"
+              >
+                {cartStatus === "loading" && <span className="pd-spinner" aria-hidden="true" />}
+                {cartStatus === "added"   && "✓ Added!"}
+                {cartStatus === "error"   && "Try again"}
+                {cartStatus === "idle"    && "🛒 Add to Cart"}
+              </button>
+            )}
+
             <button
               type="button"
               className="product-quote-button"
@@ -167,6 +211,21 @@ export default function ProductDetails({ type = "sparepart" }) {
               Send Enquiry
             </Link>
           </div>
+
+          {/* ── Cart feedback messages ── */}
+          {cartMessage && (
+            <p className={`product-cart-feedback ${cartStatus === "error" ? "product-cart-feedback--error" : "product-cart-feedback--success"}`} role="status">
+              {cartMessage}{" "}
+              {cartStatus === "added" && (
+                <Link to="/cart" className="product-cart-feedback-link">View cart →</Link>
+              )}
+            </p>
+          )}
+          {showAuthHint && (
+            <p className="product-cart-feedback product-cart-feedback--info" role="alert">
+              Please log in to add items to your cart.
+            </p>
+          )}
         </div>
       </section>
 

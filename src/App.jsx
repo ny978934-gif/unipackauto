@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./components/pages/Home.jsx";
 import GetQuote from "./components/pages/GetQuote.jsx";
+import CartPage from "./components/pages/CartPage.jsx";
 import SpareParts from "./components/pages/spareparts/SpareParts.jsx";
 import MachineProducts from "./components/pages/products/Products.jsx";
 import ProductDetails from "./components/pages/spareparts/ProductDetails.jsx";
@@ -22,27 +25,21 @@ import "./components/UnifiedTheme.css";
 
 function HashScroll() {
   const location = useLocation();
-
   useEffect(() => {
     if (!location.hash) return;
-
     const scrollToHash = () => {
       const target = document.querySelector(location.hash);
       if (!target) return;
-
       const navbarHeight = document.querySelector(".navbar-container-outer")?.offsetHeight || 0;
       const targetTop = target.getBoundingClientRect().top + window.scrollY - navbarHeight;
       window.scrollTo({ top: targetTop, behavior: "smooth" });
     };
-
     const timer = window.setTimeout(scrollToHash, 40);
     return () => window.clearTimeout(timer);
   }, [location.pathname, location.hash]);
-
   return null;
 }
 
-// Wraps all routes — hides public Navbar/Footer on admin pages
 function AppShell() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
@@ -54,6 +51,7 @@ function AppShell() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/get-quote" element={<GetQuote />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/products" element={<MachineProducts />} />
           <Route path="/products/:categorySlug" element={<Products type="machine" />} />
           <Route path="/products/:categorySlug/:productSlug" element={<ProductDetails type="machine" />} />
@@ -61,7 +59,7 @@ function AppShell() {
           <Route path="/spare-parts" element={<SpareParts />} />
           <Route path="/spare-parts/:categorySlug" element={<Products />} />
           <Route path="/spare-parts/:categorySlug/:productSlug" element={<ProductDetails />} />
-          {/* Admin Portal — renders its own sidebar/header, no public nav */}
+          {/* Admin */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/setup" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminProtectedRoute />}>
@@ -75,9 +73,7 @@ function AppShell() {
               <Route path="spare-parts-uploader" element={<SparePartsUploader />} />
             </Route>
           </Route>
-          {/* Product Catalog */}
           <Route path="/catalog" element={<Catalog />} />
-          {/* Fallback */}
           <Route path="*" element={<Home />} />
         </Routes>
       </main>
@@ -89,8 +85,12 @@ function AppShell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <HashScroll />
-      <AppShell />
+      <AuthProvider>
+        <CartProvider>
+          <HashScroll />
+          <AppShell />
+        </CartProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
