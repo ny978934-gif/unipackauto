@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import AuthModal from "./auth/AuthModal";
 import logo from "../assests/logo.jpeg";
+import catalogPdf from "../assests/unipackauto-india.pdf";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -186,6 +187,14 @@ export default function Navbar() {
                       {cat.name}
                     </Link>
                   ))}
+                  <div className="products-menu-actions">
+                    <a href={catalogPdf} download="unipackauto-india-catalogue.pdf">
+                      Download Catalogue
+                    </a>
+                    <a href="https://www.unipackauto.in/" target="_blank" rel="noopener noreferrer">
+                      View Machines
+                    </a>
+                  </div>
                 </div>
               </div>
 
@@ -297,6 +306,14 @@ export default function Navbar() {
                     {machineCategories.map((cat) => (
                       <Link key={cat._id || cat.slug} to={`/products/${cat.slug}`} onClick={closeMenus}>{cat.name}</Link>
                     ))}
+                    <div className="products-menu-actions">
+                      <a href={catalogPdf} download="unipackauto-india-catalogue.pdf">
+                        Download Catalogue
+                      </a>
+                      <a href="https://www.unipackauto.in/" target="_blank" rel="noopener noreferrer">
+                        View Machines
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>
