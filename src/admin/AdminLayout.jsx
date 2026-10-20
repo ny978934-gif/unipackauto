@@ -29,7 +29,6 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            <span>📊</span>
             Dashboard
           </NavLink>
 
@@ -39,7 +38,6 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            <span>📁</span>
             Categories
           </NavLink>
 
@@ -49,7 +47,6 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            <span>⚙️</span>
             Spare Parts Management
           </NavLink>
 
@@ -59,7 +56,6 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            <span>🏭</span>
             Products / Machines
           </NavLink>
 
@@ -69,7 +65,6 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            <span>✉️</span>
             Inquiries
           </NavLink>
 
@@ -79,7 +74,6 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            <span>🧾</span>
             Quote Requests
           </NavLink>
 
@@ -89,7 +83,6 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            <span>📊</span>
             Spare Parts Import
           </NavLink>
 
@@ -97,7 +90,7 @@ const AdminLayout = () => {
 
         <div className="admin-sidebar-bottom">
           <NavLink to="/" className="back-website">
-            ← Back to Website
+            Back to Website
           </NavLink>
         </div>
 
@@ -115,8 +108,6 @@ const AdminLayout = () => {
           </div>
 
           <div className="admin-profile">
-            <div className="admin-avatar">N</div>
-
             <div>
               <strong>Admin</strong>
               <small>Administrator</small>

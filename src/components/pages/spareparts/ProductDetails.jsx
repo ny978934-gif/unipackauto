@@ -69,7 +69,6 @@ export default function ProductDetails({ type = "sparepart" }) {
             categorySlug,
             partId:      product._id,
             partName:    product.name,
-            itemCode:    product.partCode || "",
             quantity:    String(qty),
           },
         };
@@ -133,7 +132,7 @@ export default function ProductDetails({ type = "sparepart" }) {
           </span>
           <h1>{product.name}</h1>
 
-          {product.partCode && (
+          {type === "machine" && product.partCode && (
             <div className="part-code">Item Code: <strong>{product.partCode}</strong></div>
           )}
           {type === "sparepart" && (
@@ -145,7 +144,7 @@ export default function ProductDetails({ type = "sparepart" }) {
             {product.price > 0 ? formatPrice(product.price) : "Price on Request"}
           </div>
 
-          {product.description && (
+          {type === "machine" && product.description && (
             <p className="product-description">{product.description}</p>
           )}
 
@@ -231,7 +230,7 @@ export default function ProductDetails({ type = "sparepart" }) {
       </section>
 
       {/* Specifications */}
-      {product.specifications?.length > 0 && (
+      {type === "machine" && product.specifications?.length > 0 && (
         <section className="product-extra">
           <div className="details-box">
             <h2>Specifications</h2>

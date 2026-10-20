@@ -18,8 +18,6 @@ const emptyProduct = {
 
 export default function Products({ type = "sparepart" }) {
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [subcategoryApiAvailable, setSubcategoryApiAvailable] = useState(true);
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState("");
@@ -29,6 +27,7 @@ export default function Products({ type = "sparepart" }) {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const formCardRef = useRef(null);
   const nameInputRef = useRef(null);
   const itemLabel = type === "machine" ? "machine" : "spare part";
@@ -45,27 +44,6 @@ export default function Products({ type = "sparepart" }) {
     const [categoryData, productData] = await Promise.all([categoryResponse.json(), productResponse.json()]);
     setCategories(Array.isArray(categoryData) ? categoryData : []);
     setProducts(Array.isArray(productData) ? productData : []);
-
-    if (type === "sparepart") {
-      try {
-        const subcategoryResponse = await adminFetch(`${API}/api/spare/subcategories`, options);
-        if (!subcategoryResponse.ok) {
-          setSubcategories([]);
-          setSubcategoryApiAvailable(false);
-          return;
-        }
-        const subcategoryData = await subcategoryResponse.json();
-        setSubcategories(Array.isArray(subcategoryData) ? subcategoryData : []);
-        setSubcategoryApiAvailable(true);
-      } catch (error) {
-        if (error.name === "AbortError") throw error;
-        setSubcategories([]);
-        setSubcategoryApiAvailable(false);
-      }
-    } else {
-      setSubcategories([]);
-      setSubcategoryApiAvailable(true);
-    }
   };
 
   useEffect(() => {
@@ -80,10 +58,13 @@ export default function Products({ type = "sparepart" }) {
     const query = searchQuery.trim().toLowerCase();
     return products.filter((product) => {
       if (selectedCategoryId && (product.category?._id || product.category) !== selectedCategoryId) return false;
-      return !query || [product.name, product.partCode, product.category?.name, product.subcategory?.name, getProductUom(product)]
+      const searchableFields = type === "sparepart"
+        ? [product.name, product.category?.name, getProductUom(product)]
+        : [product.name, product.partCode, product.category?.name];
+      return !query || searchableFields
         .some((value) => String(value || "").toLowerCase().includes(query));
     });
-  }, [products, searchQuery, selectedCategoryId]);
+  }, [products, searchQuery, selectedCategoryId, type]);
 
   const resetForm = () => {
     setForm({ ...emptyProduct });
@@ -98,11 +79,23 @@ export default function Products({ type = "sparepart" }) {
     setMessage("");
     try {
       const body = new FormData();
-      Object.entries({ ...form, type }).forEach(([key, value]) => body.append(key, String(value)));
-      body.append("image", form.imageUrl);
-      body.append("images", JSON.stringify(form.imageUrl ? [form.imageUrl] : []));
-      body.append("specifications", JSON.stringify(specifications.filter((item) => item.label.trim() && item.value.trim())));
-      images.forEach((file) => body.append("images", file));
+      if (type === "sparepart") {
+        Object.entries({
+          categoryId: form.categoryId,
+          name: form.name,
+          price: form.price,
+          uom: form.uom,
+          type,
+        }).forEach(([key, value]) => body.append(key, String(value)));
+        body.append("image", form.imageUrl);
+        if (images[0]) body.append("image", images[0]);
+      } else {
+        Object.entries({ ...form, type }).forEach(([key, value]) => body.append(key, String(value)));
+        body.append("image", form.imageUrl);
+        body.append("images", JSON.stringify(form.imageUrl ? [form.imageUrl] : []));
+        body.append("specifications", JSON.stringify(specifications.filter((item) => item.label.trim() && item.value.trim())));
+        images.forEach((file) => body.append("images", file));
+      }
       const response = await adminFetch(
         editingId ? `${API}/api/products/${editingId}` : `${API}/api/products`,
         { method: editingId ? "PUT" : "POST", body }
@@ -198,26 +191,50 @@ export default function Products({ type = "sparepart" }) {
     }
   };
 
+  const downloadExcel = async (categoryId = "") => {
+    setDownloading(true);
+    setMessage("");
+    try {
+      const query = categoryId ? `?category=${encodeURIComponent(categoryId)}` : "";
+      const response = await adminFetch(`${API}/api/products/export.xlsx${query}`);
+      if (!response.ok) {
+        await response.json().then((data) => {
+          throw new Error(data.message || "Unable to export spare parts.");
+        });
+      }
+      const file = await response.blob();
+      const objectUrl = URL.createObjectURL(file);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = categoryId
+        ? `spare-parts-${categories.find((category) => category._id === categoryId)?.slug || "category"}.xlsx`
+        : "spare-parts-all.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }));
 
   return (
     <div className="admin-page">
       <div className="page-title"><div><h1>{collectionLabel} management</h1><p>Add, search, edit, and remove catalogue items.</p></div></div>
       {message && <p className="admin-notice" role="status">{message}</p>}
-      {type === "sparepart" && !subcategoryApiAvailable && (
-        <p className="admin-notice" role="status">
-          Spare parts loaded, but the configured backend does not have the subcategory API yet. Deploy the latest server code to enable subcategory management.
-        </p>
-      )}
 
       <div className="admin-form-card" ref={formCardRef}>
         <h2>{editingId ? `Edit ${itemLabel}` : `Add ${itemLabel}`}</h2>
         <form onSubmit={submit}>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor={`product-category-${type}`}>Main category (machine name) *</label>
+              <label htmlFor={`product-category-${type}`}>{type === "sparepart" ? "Machine Name" : "Machine category"} *</label>
               <select id={`product-category-${type}`} required value={form.categoryId} onChange={(event) => setForm((current) => ({ ...current, categoryId: event.target.value, subcategoryId: "" }))}>
-                <option value="">Select category</option>
+                <option value="">Select machine</option>
                 {categories.map((category) => <option key={category._id} value={category._id}>{category.name}</option>)}
               </select>
             </div>
@@ -226,71 +243,61 @@ export default function Products({ type = "sparepart" }) {
               <input ref={nameInputRef} id={`product-name-${type}`} required value={form.name} onChange={(event) => updateField("name", event.target.value)} />
             </div>
           </div>
-          {type === "sparepart" && subcategoryApiAvailable && (
-            <div className="form-group">
-              <label htmlFor="product-subcategory">Subcategory</label>
-              <select id="product-subcategory" value={form.subcategoryId} disabled={!form.categoryId} onChange={(event) => updateField("subcategoryId", event.target.value)}>
-                <option value="">No subcategory</option>
-                {subcategories
-                  .filter((subcategory) => (subcategory.category?._id || subcategory.category) === form.categoryId)
-                  .map((subcategory) => <option key={subcategory._id} value={subcategory._id}>{subcategory.name}</option>)}
-              </select>
-            </div>
-          )}
           <div className="form-row">
-            {type === "sparepart" && (
-              <div className="form-group">
-                <label htmlFor="product-part-code">Item code</label>
-                <input id="product-part-code" value={form.partCode} onChange={(event) => updateField("partCode", event.target.value)} />
-              </div>
-            )}
             <div className="form-group">
               <label htmlFor={`product-price-${type}`}>Price (INR)</label>
               <input id={`product-price-${type}`} type="number" min="0" step="0.01" value={form.price} onChange={(event) => updateField("price", event.target.value)} />
             </div>
             {type === "sparepart" && (
               <div className="form-group">
-                <label htmlFor="product-stock">Stock quantity</label>
-                <input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(event) => updateField("stock", event.target.value)} />
-              </div>
-            )}
-            {type === "sparepart" && (
-              <div className="form-group">
-                <label htmlFor="product-uom">UOM (Unit of Measure)</label>
+                <label htmlFor="product-uom">UOM (Unit of Measurement)</label>
                 <input id="product-uom" value={form.uom} placeholder="e.g. piece, set, meter" onChange={(event) => updateField("uom", event.target.value)} />
               </div>
             )}
           </div>
           <div className="form-group">
-            <label htmlFor={`product-slug-${type}`}>Slug</label>
-            <input id={`product-slug-${type}`} value={form.slug} placeholder="Generated from name if empty" onChange={(event) => updateField("slug", event.target.value)} />
-          </div>
-          <div className="form-group">
-            <label htmlFor={`product-image-url-${type}`}>Image URL</label>
+            <label htmlFor={`product-image-url-${type}`}>{type === "sparepart" ? "Spare Image URL" : "Image URL"}</label>
             <input id={`product-image-url-${type}`} type="url" value={form.imageUrl} placeholder="https://example.com/product-image.jpg" onChange={(event) => updateField("imageUrl", event.target.value)} />
             {form.imageUrl && <img className="admin-product-image-preview" src={form.imageUrl} alt={`${form.name || "Product"} preview`} />}
           </div>
           <div className="form-group">
-            <label htmlFor={`product-images-${type}`}>Upload images (up to 10)</label>
-            <input id={`product-images-${type}`} type="file" accept="image/*" multiple onChange={(event) => setImages(Array.from(event.target.files || []))} />
-            <small>{images.length ? `${images.length} new image(s) selected; they replace existing images.` : "Choose files to upload or enter an image URL above."}</small>
+            <label htmlFor={`product-images-${type}`}>{type === "sparepart" ? "Upload spare image" : "Upload images (up to 10)"}</label>
+            <input
+              id={`product-images-${type}`}
+              type="file"
+              accept="image/*"
+              multiple={type === "machine"}
+              onChange={(event) => {
+                const selectedImages = Array.from(event.target.files || []);
+                setImages(type === "sparepart" ? selectedImages.slice(0, 1) : selectedImages);
+              }}
+            />
+            <small>{images.length ? "A new image will replace the current image." : "Choose an image file or enter an image URL above."}</small>
           </div>
-          <div className="form-group">
-            <label htmlFor={`product-description-${type}`}>Description</label>
-            <textarea id={`product-description-${type}`} value={form.description} onChange={(event) => updateField("description", event.target.value)} />
-          </div>
-          <div className="form-group">
-            <label>Specifications</label>
-            {specifications.map((item, index) => (
-              <div className="form-row" key={`${index}-${item.label}`}>
-                <input aria-label={`Specification ${index + 1} name`} placeholder="Name" value={item.label} onChange={(event) => setSpecifications((all) => all.map((entry, i) => i === index ? { ...entry, label: event.target.value } : entry))} />
-                <input aria-label={`Specification ${index + 1} value`} placeholder="Value" value={item.value} onChange={(event) => setSpecifications((all) => all.map((entry, i) => i === index ? { ...entry, value: event.target.value } : entry))} />
-                <button type="button" className="delete-btn" onClick={() => setSpecifications((all) => all.filter((_, i) => i !== index))}>Remove</button>
+          {type === "machine" && (
+            <>
+              <div className="form-group">
+                <label htmlFor={`product-slug-${type}`}>Slug</label>
+                <input id={`product-slug-${type}`} value={form.slug} placeholder="Generated from name if empty" onChange={(event) => updateField("slug", event.target.value)} />
               </div>
-            ))}
-            <button type="button" className="edit-btn" onClick={() => setSpecifications((all) => [...all, { label: "", value: "" }])}>+ Add specification</button>
-          </div>
-          <label className="checkbox-field"><input type="checkbox" checked={form.inStock} onChange={(event) => updateField("inStock", event.target.checked)} /> In stock</label>
+              <div className="form-group">
+                <label htmlFor={`product-description-${type}`}>Description</label>
+                <textarea id={`product-description-${type}`} value={form.description} onChange={(event) => updateField("description", event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Specifications</label>
+                {specifications.map((item, index) => (
+                  <div className="form-row" key={`${index}-${item.label}`}>
+                    <input aria-label={`Specification ${index + 1} name`} placeholder="Name" value={item.label} onChange={(event) => setSpecifications((all) => all.map((entry, i) => i === index ? { ...entry, label: event.target.value } : entry))} />
+                    <input aria-label={`Specification ${index + 1} value`} placeholder="Value" value={item.value} onChange={(event) => setSpecifications((all) => all.map((entry, i) => i === index ? { ...entry, value: event.target.value } : entry))} />
+                    <button type="button" className="delete-btn" onClick={() => setSpecifications((all) => all.filter((_, i) => i !== index))}>Remove</button>
+                  </div>
+                ))}
+                <button type="button" className="edit-btn" onClick={() => setSpecifications((all) => [...all, { label: "", value: "" }])}>+ Add specification</button>
+              </div>
+              <label className="checkbox-field"><input type="checkbox" checked={form.inStock} onChange={(event) => updateField("inStock", event.target.checked)} /> In stock</label>
+            </>
+          )}
           <button className="primary-btn" disabled={loading || !categories.length}>{loading ? "Saving..." : editingId ? `Update ${itemLabel}` : `Save ${itemLabel}`}</button>
           {editingId && <button type="button" className="edit-btn" onClick={resetForm}>Cancel edit</button>}
         </form>
@@ -301,10 +308,25 @@ export default function Products({ type = "sparepart" }) {
           <h2>{collectionLabel}</h2>
           <div className="admin-products-actions">
             <span>{filteredProducts.length} of {products.length}</span>
-            {type === "sparepart" && selectedCategoryId && (
-              <button type="button" className="delete-btn" onClick={removeCategoryParts} disabled={loading}>
-                Delete All Parts in Category
-              </button>
+            {type === "sparepart" && (
+              <>
+                <button type="button" className="edit-btn" onClick={() => downloadExcel()} disabled={downloading}>
+                  {downloading ? "Preparing Excel..." : "Download All Excel"}
+                </button>
+                <button
+                  type="button"
+                  className="edit-btn"
+                  onClick={() => downloadExcel(selectedCategoryId)}
+                  disabled={!selectedCategoryId || downloading}
+                >
+                  Download Category Excel
+                </button>
+                {selectedCategoryId && (
+                  <button type="button" className="delete-btn" onClick={removeCategoryParts} disabled={loading}>
+                    Delete All Parts in Category
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -320,25 +342,43 @@ export default function Products({ type = "sparepart" }) {
           </select>
         </div>
         <div className="admin-table-search">
-          <label htmlFor={`product-search-${type}`}>Search by name, item code, category, subcategory, or UOM</label>
+          <label htmlFor={`product-search-${type}`}>
+            {type === "sparepart" ? "Search by spare part, machine, or UOM" : "Search by product or machine"}
+          </label>
           <input id={`product-search-${type}`} type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search catalogue..." />
         </div>
         <div className="table-wrapper">
           <table>
-            <thead><tr><th>Name</th><th>Machine name</th>{type === "sparepart" && <><th>Item code</th><th>Subcategory</th><th>UOM</th><th>Stock</th></>}<th>Price</th><th>Actions</th></tr></thead>
+            <thead>
+              {type === "sparepart"
+                ? <tr><th>Machine Name</th><th>Spare Part Name</th><th>Spare Image</th><th>Price</th><th>UOM</th><th>Actions</th></tr>
+                : <tr><th>Name</th><th>Machine name</th><th>Price</th><th>Actions</th></tr>}
+            </thead>
             <tbody>
               {filteredProducts.map((item) => (
                 <tr key={item._id}>
-                  <td>{item.name}</td><td>{item.category?.name || "—"}</td>
-                  {type === "sparepart" && <td>{item.partCode || "—"}</td>}
-                  {type === "sparepart" && <td>{item.subcategory?.name || "—"}</td>}
-                  {type === "sparepart" && <td>{getProductUom(item) || "—"}</td>}
-                  {type === "sparepart" && <td>{item.stock ?? 0}</td>}
-                  <td>{formatPrice(item.price)}</td>
+                  {type === "sparepart" ? (
+                    <>
+                      <td>{item.category?.name || "—"}</td>
+                      <td>{item.name}</td>
+                      <td>{item.image || item.images?.[0]
+                        ? <img className="admin-product-image-preview" src={item.image || item.images[0]} alt={`${item.name} spare part`} />
+                        : "—"}
+                      </td>
+                      <td>{formatPrice(item.price)}</td>
+                      <td>{getProductUom(item) || "—"}</td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{item.name}</td>
+                      <td>{item.category?.name || "—"}</td>
+                      <td>{formatPrice(item.price)}</td>
+                    </>
+                  )}
                   <td><button type="button" className="edit-btn" onClick={() => edit(item)}>Edit</button><button type="button" className="delete-btn" onClick={() => remove(item._id)}>Delete</button></td>
                 </tr>
               ))}
-              {!filteredProducts.length && <tr><td colSpan={type === "sparepart" ? 8 : 4}>{products.length ? "No items match this category or search." : "No items in this catalogue."}</td></tr>}
+              {!filteredProducts.length && <tr><td colSpan={type === "sparepart" ? 6 : 4}>{products.length ? "No items match this category or search." : "No items in this catalogue."}</td></tr>}
             </tbody>
           </table>
         </div>

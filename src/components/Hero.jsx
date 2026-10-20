@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import heroImageA from '../assests/a.jpg';
-import heroImageB from '../assests/b.jpg';
-import heroImageC from '../assests/c.jpg';
-import heroImageD from '../assests/d.jpg';
-import heroImageE from '../assests/e.jpg';
+import heroImageA from '../assests/a.png';
+import heroImageB from '../assests/b.png';
+import heroImageC from '../assests/c.png';
+import heroImageD from '../assests/d.png';
+import heroImageE from '../assests/e.png';
 import './Hero.css';
 
 const slides = [

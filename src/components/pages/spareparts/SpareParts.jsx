@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API } from "../../../spareApi";
+import logo from "../../../assests/logo.jpeg";
+import CloudinaryImage from "./CloudinaryImage";
 import "./SpareParts.css";
 
 const newestFirst = (items = []) =>
@@ -12,7 +14,9 @@ const newestFirst = (items = []) =>
 
 export default function SpareParts({ type = "sparepart" }) {
   const [categories, setCategories] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
   const [state, setState] = useState("loading");
+  const [featuredState, setFeaturedState] = useState("loading");
   const catalogPath = type === "machine" ? "/products" : "/spare-parts";
   const isMachineCatalog = type === "machine";
 
@@ -33,6 +37,28 @@ export default function SpareParts({ type = "sparepart" }) {
     return () => controller.abort();
   }, [type]);
 
+  useEffect(() => {
+    if (isMachineCatalog) {
+      setFeaturedState("ready");
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    fetch(`${API}/api/products?type=sparepart`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load spare parts");
+        return response.json();
+      })
+      .then((data) => {
+        setFeaturedProducts(Array.isArray(data) ? data : []);
+        setFeaturedState("ready");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") setFeaturedState("error");
+      });
+    return () => controller.abort();
+  }, [isMachineCatalog]);
+
   return (
     <div className="spare-page">
       <section className="spare-hero">
@@ -50,6 +76,42 @@ export default function SpareParts({ type = "sparepart" }) {
           </p>
         </div>
       </section>
+
+      {!isMachineCatalog && (
+        <section className="featured-spare-parts">
+          <div className="section-heading">
+            <span>SPARE PARTS</span>
+            <h2>Featured spare parts</h2>
+          </div>
+          {featuredState === "loading" && <p>Loading spare parts...</p>}
+          {featuredState === "error" && <p>Unable to load spare parts. Please try again later.</p>}
+          {featuredState === "ready" && featuredProducts.length === 0 && <p>No spare parts available yet.</p>}
+          {featuredProducts.length > 0 && (
+            <div className="featured-spare-parts-grid">
+              {featuredProducts.slice(0, 8).map((product) => {
+                const categorySlug = product.category?.slug;
+                const productPath = categorySlug
+                  ? `${catalogPath}/${categorySlug}/${product.slug}`
+                  : catalogPath;
+                return (
+                  <Link className="featured-spare-part-card" key={product._id} to={productPath}>
+                    <div className="featured-spare-part-image">
+                      <CloudinaryImage
+                        src={product.image || product.images?.[0]}
+                        fallbackSrc={logo}
+                        alt={product.name}
+                        loading="lazy"
+                      />
+                    </div>
+                    <h3>{product.name}</h3>
+                    <span>{product.category?.name || "Spare part"}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="category-section">
         <div className="section-heading">

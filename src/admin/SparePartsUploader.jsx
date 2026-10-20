@@ -165,10 +165,10 @@ export default function SparePartsUploader() {
         <div className="sp-import-fields-hint">
           <span>Required column:</span><code>Part Name</code>
           <span>Recognized columns:</span>
-          <code>Price</code><code>Stock</code><code>UOM</code>
+          <code>Spare Image</code><code>Price</code><code>UOM</code>
         </div>
         <p className="sp-import-help">
-          Excel sheet names are ignored. The importer scans all sheets for a table with a Part Name column and imports its rows into the selected category; Price, UOM, and Stock columns are optional. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
+          Excel sheet names are ignored. The importer scans all sheets for a table with a Part Name column and imports its rows into the selected machine category. Spare Image, Price, and UOM columns are optional. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
         </p>
         <button className="primary-btn sp-import-submit-btn" type="submit" disabled={!categoryId || !file || uploading}>
           {uploading
@@ -190,15 +190,18 @@ export default function SparePartsUploader() {
           </div>
           <div className="table-wrapper">
             <table>
-              <thead><tr><th>Part name</th><th>Price</th><th>Stock</th><th>UOM</th><th>Details</th></tr></thead>
+              <thead><tr><th>Machine name</th><th>Spare part name</th><th>Spare image</th><th>Price</th><th>UOM</th></tr></thead>
               <tbody>
                 {imported.products.map((product) => (
                   <tr key={product._id}>
+                    <td>{imported.category.name}</td>
                     <td><strong>{product.name}</strong></td>
+                    <td>{product.image || product.images?.[0]
+                      ? <img className="admin-product-image-preview" src={product.image || product.images[0]} alt={`${product.name} spare part`} />
+                      : "—"}
+                    </td>
                     <td>{product.price > 0 ? formatPrice(product.price) : "—"}</td>
-                    <td>{product.stock ?? (product.inStock ? "Available" : "0")}</td>
                     <td>{product.uom || "—"}</td>
-                    <td><Link to={`/spare-parts/${imported.category.slug}/${product.slug}`}>View details</Link></td>
                   </tr>
                 ))}
               </tbody>

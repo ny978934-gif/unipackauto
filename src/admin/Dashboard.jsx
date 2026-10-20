@@ -54,10 +54,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* STAT CARDS */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon purple">📁</div>
           <div>
             <span>Total Categories</span>
             <h2>{loading ? "..." : stats.categories}</h2>
@@ -65,7 +63,6 @@ const Dashboard = () => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon orange">⚙️</div>
           <div>
             <span>Total Products</span>
             <h2>{loading ? "..." : stats.products}</h2>
@@ -73,14 +70,12 @@ const Dashboard = () => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon blue">✉️</div>
           <div>
             <span>New Inquiries</span>
             <h2>{loading ? "..." : stats.newInquiries}</h2>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon orange">🧾</div>
           <div>
             <span>New Quote Requests</span>
             <h2>{loading ? "..." : stats.newQuoteRequests}</h2>
@@ -88,28 +83,24 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* QUICK ACTIONS */}
       <div className="dashboard-section">
         <h2>Quick Actions</h2>
         <div className="quick-grid">
           <Link to="/admin/categories" className="quick-card">
-            <span>📁</span>
             <div>
               <h3>Manage Categories</h3>
-              <p>Organize machine categories and spare-part subcategories</p>
+              <p>Organize machine categories</p>
             </div>
           </Link>
 
           <Link to="/admin/products" className="quick-card">
-            <span>⚙️</span>
             <div>
               <h3>Manage Spare Parts</h3>
-              <p>Add and manage spare-part names, categories, images, and pricing</p>
+              <p>Manage spare-part names, images, prices, and units of measure</p>
             </div>
           </Link>
 
           <Link to="/admin/spare-parts-uploader" className="quick-card">
-            <span>📊</span>
             <div>
               <h3>Import Spare Parts</h3>
               <p>Upload Word or Excel files to add multiple parts</p>
@@ -117,7 +108,6 @@ const Dashboard = () => {
           </Link>
 
           <Link to="/admin/machines" className="quick-card">
-            <span>🏭</span>
             <div>
               <h3>Manage Products / Machines</h3>
               <p>Add, edit, delete, or import machines and their catalogue details</p>
@@ -125,55 +115,42 @@ const Dashboard = () => {
           </Link>
 
           <Link to="/admin/inquiries" className="quick-card">
-            <span>✉️</span>
             <div>
               <h3>View Inquiries</h3>
-              <p>{stats.inquiries} total · {stats.newInquiries} new customer messages</p>
+              <p>{stats.inquiries} total, {stats.newInquiries} new customer messages</p>
             </div>
           </Link>
 
           <Link to="/admin/quote-requests" className="quick-card">
-            <span>🧾</span>
             <div>
               <h3>Manage Quote Requests</h3>
-              <p>{stats.quoteRequests} total · {stats.newQuoteRequests} new machine and spare-part requests</p>
+              <p>{stats.quoteRequests} total, {stats.newQuoteRequests} new machine and spare-part requests</p>
             </div>
           </Link>
         </div>
       </div>
 
-      {/* STRUCTURE */}
       <div className="structure-card">
         <h2>Catalog Structure</h2>
         <div className="structure-flow">
           <div className="structure-item">
-            <span>📁</span>
-            <strong>Main Category</strong>
-            <small>Machine name (e.g. Strapping)</small>
+            <strong>Machine Name</strong>
+            <small>Category (e.g. Strapping)</small>
           </div>
 
-          <div className="arrow">→</div>
-
           <div className="structure-item">
-            <span>🗂️</span>
-            <strong>Subcategory</strong>
-            <small>Optional spare-part grouping</small>
-          </div>
-
-          <div className="arrow">→</div>
-
-          <div className="structure-item">
-            <span>⚙️</span>
             <strong>Spare Part</strong>
-            <small>Name, image, UOM, and price</small>
+            <small>Name and image</small>
           </div>
 
-          <div className="arrow">→</div>
+          <div className="structure-item">
+            <strong>Price</strong>
+            <small>Spare part price</small>
+          </div>
 
           <div className="structure-item">
-            <span>📄</span>
-            <strong>Detail Page</strong>
-            <small>Price, specifications, and inquiry details</small>
+            <strong>UOM</strong>
+            <small>Unit of measurement</small>
           </div>
         </div>
       </div>

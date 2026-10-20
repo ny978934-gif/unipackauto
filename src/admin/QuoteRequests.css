@@ -22,18 +22,18 @@
   min-height: 78px;
   padding: 17px 21px;
   background: #fff;
-  border: 1px solid #eee;
+  border: 1px solid var(--admin-border, #e6dfd3);
   border-radius: 14px;
 }
 
 .quote-request-summary span {
-  color: #777;
+  color: var(--admin-muted, #766f65);
   font-size: 14px;
   font-weight: 600;
 }
 
 .quote-request-summary strong {
-  color: #66116f;
+  color: var(--admin-accent, #786246);
   font-size: 27px;
 }
 
@@ -71,7 +71,7 @@
 
 .quote-request-filters .form-group > span,
 .quote-status-control > span {
-  color: #555;
+  color: var(--admin-text, #302b24);
   font-size: 13px;
   font-weight: 600;
 }
@@ -83,7 +83,7 @@
   width: 100%;
   min-height: 42px;
   padding: 9px 11px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--admin-border, #e6dfd3);
   border-radius: 8px;
   background: #fff;
   font: inherit;
@@ -105,7 +105,7 @@
 .quote-request-card {
   min-width: 0;
   padding: 19px;
-  border: 1px solid #eee9e0;
+  border: 1px solid var(--admin-border, #e6dfd3);
   border-radius: 12px;
   background: #fff;
 }
@@ -120,16 +120,16 @@
 .quote-kind-badge {
   display: inline-block;
   padding: 5px 9px;
-  color: #5c4b32;
-  background: #f4eddf;
+  color: #71552f;
+  background: var(--admin-cream-dark, #ede4d3);
   border-radius: 99px;
   font-size: 11px;
   font-weight: 750;
 }
 
 .quote-kind-machine {
-  color: #315c69;
-  background: #e9f2f3;
+  color: #5e5a50;
+  background: var(--admin-cream, #f6f1e7);
 }
 
 .quote-request-card-head h3 {
@@ -161,15 +161,15 @@
   gap: 8px 18px;
   margin: 15px 0;
   padding: 12px 0;
-  border-top: 1px solid #f0ede7;
-  border-bottom: 1px solid #f0ede7;
+  border-top: 1px solid var(--admin-border, #e6dfd3);
+  border-bottom: 1px solid var(--admin-border, #e6dfd3);
   color: #6e685f;
   font-size: 13px;
 }
 
 .quote-request-contact a,
 .quote-request-card-foot a {
-  color: #665238;
+  color: var(--admin-accent-hover, #624f37);
   overflow-wrap: anywhere;
   text-decoration: none;
 }
@@ -212,7 +212,7 @@
   gap: 4px;
   min-width: 0;
   padding: 11px 12px;
-  background: #faf8f4;
+  background: var(--admin-cream, #f6f1e7);
   border-radius: 8px;
   color: #686158;
   font-size: 12px;
@@ -243,7 +243,7 @@
   gap: 12px;
   margin-top: 15px;
   padding-top: 12px;
-  border-top: 1px solid #f0ede7;
+  border-top: 1px solid var(--admin-border, #e6dfd3);
   color: #8b857b;
   font-size: 12px;
 }
