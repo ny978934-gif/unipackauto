@@ -17,6 +17,7 @@ export default function ProductDetails({ type = "sparepart" }) {
   const catalogLabel = type === "machine" ? "Products / Machines" : "Spare Parts";
 
   const [product,       setProduct]       = useState(null);
+  const [activeImage,   setActiveImage]   = useState("");
   const [state,         setState]         = useState("loading");
   const [quantity,      setQuantity]      = useState(1);
   const [cartStatus,    setCartStatus]    = useState("idle"); // idle | loading | added | error
@@ -40,6 +41,7 @@ export default function ProductDetails({ type = "sparepart" }) {
 
   // Reset quantity whenever the product changes
   useEffect(() => { setQuantity(1); }, [productSlug]);
+  useEffect(() => { setActiveImage(""); }, [product?._id]);
 
   if (state === "loading") {
     return <div className="product-not-found"><h2>Loading item…</h2></div>;
@@ -53,7 +55,12 @@ export default function ProductDetails({ type = "sparepart" }) {
     );
   }
 
-  const image        = product.image || product.images?.[0] || "";
+  const galleryImages = [...new Set([
+    ...(Array.isArray(product.images) ? product.images : []),
+    product.image,
+  ].filter((imageUrl) => typeof imageUrl === "string" && imageUrl.trim()))]
+    .slice(0, type === "sparepart" ? 5 : 10);
+  const image        = galleryImages.includes(activeImage) ? activeImage : galleryImages[0] || "";
   const categoryName = product.category?.name || categorySlug;
   const uom          = getProductUom(product);
 
@@ -122,8 +129,26 @@ export default function ProductDetails({ type = "sparepart" }) {
 
       {/* Main */}
       <section className="product-main">
-        <div className="product-image-box">
-          <CloudinaryImage src={image} fallbackSrc={logo} alt={product.name} />
+        <div className="product-gallery">
+          <div className="product-image-box">
+            <CloudinaryImage src={image} fallbackSrc={logo} alt={product.name} />
+          </div>
+          {galleryImages.length > 1 && (
+            <div className="product-image-thumbnails" aria-label="Product images">
+              {galleryImages.map((imageUrl, index) => (
+                <button
+                  className={`product-image-thumbnail ${image === imageUrl ? "active" : ""}`}
+                  key={imageUrl}
+                  type="button"
+                  onClick={() => setActiveImage(imageUrl)}
+                  aria-label={`Show image ${index + 1} of ${galleryImages.length}`}
+                  aria-pressed={image === imageUrl}
+                >
+                  <CloudinaryImage src={imageUrl} fallbackSrc={logo} alt="" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="product-info">

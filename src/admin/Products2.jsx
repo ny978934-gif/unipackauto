@@ -21,6 +21,7 @@ export default function Products({ type = "sparepart" }) {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState("");
+  const [imageUrls, setImageUrls] = useState("");
   const [images, setImages] = useState([]);
   const [specifications, setSpecifications] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,6 +70,7 @@ export default function Products({ type = "sparepart" }) {
   const resetForm = () => {
     setForm({ ...emptyProduct });
     setEditingId("");
+    setImageUrls("");
     setImages([]);
     setSpecifications([]);
   };
@@ -80,6 +82,10 @@ export default function Products({ type = "sparepart" }) {
     try {
       const body = new FormData();
       if (type === "sparepart") {
+        const urlList = imageUrls.split(/\r?\n/).map((url) => url.trim()).filter(Boolean);
+        if (urlList.length + images.length > 5) {
+          throw new Error("A spare part may have at most 5 images in total.");
+        }
         Object.entries({
           categoryId: form.categoryId,
           name: form.name,
@@ -87,8 +93,8 @@ export default function Products({ type = "sparepart" }) {
           uom: form.uom,
           type,
         }).forEach(([key, value]) => body.append(key, String(value)));
-        body.append("image", form.imageUrl);
-        if (images[0]) body.append("image", images[0]);
+        body.append("imageUrls", JSON.stringify(urlList));
+        images.forEach((file) => body.append("images", file));
       } else {
         Object.entries({ ...form, type }).forEach(([key, value]) => body.append(key, String(value)));
         body.append("image", form.imageUrl);
@@ -131,6 +137,9 @@ export default function Products({ type = "sparepart" }) {
       description: product.description || "",
       inStock: Boolean(product.inStock),
     });
+    setImageUrls(
+      (product.images?.length ? product.images : product.image ? [product.image] : []).join("\n")
+    );
     setSpecifications(product.specifications || []);
     setImages([]);
     setMessage("");
@@ -152,7 +161,7 @@ export default function Products({ type = "sparepart" }) {
       if (!response.ok) throw new Error(data.message || `Unable to delete ${itemLabel}.`);
       setProducts((items) => items.filter((item) => item._id !== id));
       if (editingId === id) resetForm();
-      setMessage(`${itemLabel} deleted.`);
+      setMessage(data.message || `${itemLabel} deleted.`);
     } catch (error) {
       setMessage(error.message);
     }
@@ -182,7 +191,7 @@ export default function Products({ type = "sparepart" }) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || "Unable to delete parts in this category.");
       if (editingId && categoryProducts.some((product) => product._id === editingId)) resetForm();
-      setMessage(`${data.deletedCount} spare part(s) deleted from ${category.name}.`);
+      setMessage(data.message || `${data.deletedCount} spare part(s) deleted from ${category.name}.`);
       await load();
     } catch (error) {
       setMessage(error.message);
@@ -255,24 +264,64 @@ export default function Products({ type = "sparepart" }) {
               </div>
             )}
           </div>
+          {type === "sparepart" ? (
+            <div className="form-group">
+              <label htmlFor="product-image-urls">Spare Image URLs (one per line, up to 5)</label>
+              <textarea
+                id="product-image-urls"
+                value={imageUrls}
+                rows={Math.min(Math.max(imageUrls.split(/\r?\n/).length, 2), 5)}
+                onChange={(event) => {
+                  const nextUrls = event.target.value;
+                  const urlCount = nextUrls.split(/\r?\n/).map((url) => url.trim()).filter(Boolean).length;
+                  if (urlCount + images.length > 5) {
+                    setMessage("A spare part may have at most 5 images in total.");
+                    return;
+                  }
+                  setImageUrls(nextUrls);
+                  setMessage("");
+                }}
+                placeholder={"https://example.com/part-front.jpg\nhttps://example.com/part-side.jpg"}
+              />
+              {imageUrls.split(/\r?\n/).map((url) => url.trim()).filter(Boolean).map((url) => (
+                <img key={url} className="admin-product-image-preview" src={url} alt={`${form.name || "Spare part"} preview`} />
+              ))}
+            </div>
+          ) : (
+            <div className="form-group">
+              <label htmlFor={`product-image-url-${type}`}>Image URL</label>
+              <input id={`product-image-url-${type}`} type="url" value={form.imageUrl} placeholder="https://example.com/product-image.jpg" onChange={(event) => updateField("imageUrl", event.target.value)} />
+              {form.imageUrl && <img className="admin-product-image-preview" src={form.imageUrl} alt={`${form.name || "Product"} preview`} />}
+            </div>
+          )}
           <div className="form-group">
-            <label htmlFor={`product-image-url-${type}`}>{type === "sparepart" ? "Spare Image URL" : "Image URL"}</label>
-            <input id={`product-image-url-${type}`} type="url" value={form.imageUrl} placeholder="https://example.com/product-image.jpg" onChange={(event) => updateField("imageUrl", event.target.value)} />
-            {form.imageUrl && <img className="admin-product-image-preview" src={form.imageUrl} alt={`${form.name || "Product"} preview`} />}
-          </div>
-          <div className="form-group">
-            <label htmlFor={`product-images-${type}`}>{type === "sparepart" ? "Upload spare image" : "Upload images (up to 10)"}</label>
+            <label htmlFor={`product-images-${type}`}>{type === "sparepart" ? "Upload spare part images (up to 5)" : "Upload images (up to 10)"}</label>
             <input
               id={`product-images-${type}`}
               type="file"
               accept="image/*"
-              multiple={type === "machine"}
+              multiple
               onChange={(event) => {
                 const selectedImages = Array.from(event.target.files || []);
-                setImages(type === "sparepart" ? selectedImages.slice(0, 1) : selectedImages);
+                if (type === "sparepart") {
+                  const urlCount = imageUrls.split(/\r?\n/).map((url) => url.trim()).filter(Boolean).length;
+                  const remaining = Math.max(0, 5 - urlCount);
+                  setImages(selectedImages.slice(0, remaining));
+                  if (selectedImages.length > remaining) {
+                    setMessage("A spare part may have at most 5 images in total.");
+                  }
+                } else {
+                  setImages(selectedImages.slice(0, 10));
+                }
               }}
             />
-            <small>{images.length ? "A new image will replace the current image." : "Choose an image file or enter an image URL above."}</small>
+            <small>
+              {images.length
+                ? `${images.length} image file(s) selected. ${type === "sparepart" ? "They will be added to the image URLs above." : "They replace existing images."}`
+                : type === "sparepart"
+                  ? "Choose up to 5 image files; uploaded images can be combined with image URLs."
+                  : "Choose image files to upload or enter an image URL above."}
+            </small>
           </div>
           {type === "machine" && (
             <>
