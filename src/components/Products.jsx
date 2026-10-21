@@ -2,18 +2,43 @@ import "./Products.css";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API } from "../spareApi";
+import gjImage from "../assests/gj.PNG";
+import agImage from "../assests/ag.PNG";
+import alImage from "../assests/al.PNG";
+import anImage from "../assests/an.PNG";
+import abImage from "../assests/ab.PNG";
+import acImage from "../assests/ac.PNG";
+import adImage from "../assests/ad.PNG";
+import aeImage from "../assests/ae.PNG";
+import afImage from "../assests/af.PNG";
+import automaticStrappingImage from "../assests/automatic strapping machine.PNG";
+import semiAutomaticStrappingImage from "../assests/semi automatic strapping machine.PNG";
+
+const categoryImages = [
+  gjImage,
+  agImage,
+  alImage,
+  anImage,
+  abImage,
+  acImage,
+  adImage,
+  aeImage,
+  afImage,
+  automaticStrappingImage,
+  semiAutomaticStrappingImage,
+];
 
 export default function Products() {
-  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [state, setState] = useState("loading"); // loading | ready | error
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${API}/api/products?type=machine`, { signal: controller.signal })
+    fetch(`${API}/api/spare/categories?type=sparepart`, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error("Unable to load products.");
+        if (!res.ok) throw new Error("Unable to load spare-part machine categories.");
         const data = await res.json();
-        setProducts(Array.isArray(data) ? data : []);
+        setCategories(Array.isArray(data) ? data : []);
         setState("ready");
       })
       .catch((err) => {
@@ -22,25 +47,18 @@ export default function Products() {
     return () => controller.abort();
   }, []);
 
-  const buildHref = (product) => {
-    return product.category?.slug
-      ? `/products/${product.category.slug}/${product.slug}`
-      : "/products";
-  };
-
   return (
     <section id="products" className="products">
       <div className="products__container">
 
         {/* Header */}
         <div className="products__header">
-          <p className="products__kicker">What We Build</p>
+          <p className="products__kicker">Spare Parts by Machine</p>
           <h2 className="products__title">
-            Machinery for every stage of the packing line
+            Find the right parts for your packaging machine
           </h2>
           <p className="products__subtitle">
-            Browse our full range of packaging machines — each available in
-            manual, semi-automatic and fully automatic configurations.
+            Choose a machine to browse its available spare parts.
           </p>
         </div>
 
@@ -55,14 +73,14 @@ export default function Products() {
         {/* Error */}
         {state === "error" && (
           <div className="products__status products__status--error">
-            <p>Unable to load products. Please try again later.</p>
+            <p>Unable to load machine categories. Please try again later.</p>
           </div>
         )}
 
         {/* Empty */}
-        {state === "ready" && products.length === 0 && (
+        {state === "ready" && categories.length === 0 && (
           <div className="products__status">
-            <p>No products have been added yet.</p>
+            <p>No spare-part machine categories are available yet.</p>
             <Link to="/#contact" className="products__link" style={{ marginTop: "12px" }}>
               Contact us for the full catalogue
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -76,39 +94,34 @@ export default function Products() {
         )}
 
         {/* Grid */}
-        {state === "ready" && products.length > 0 && (
+        {state === "ready" && categories.length > 0 && (
           <div className="products__grid">
-            {products.map((p, index) => (
-              <article className="products__card" key={p._id}>
+            {categories.map((category, index) => (
+              <article className="products__card" key={category._id || category.slug}>
                 <div className="products__image-box">
-                  {(p.image || p.images?.[0]) ? (
-                    <img
-                      src={p.image || p.images[0]}
-                      alt={p.name}
-                      className="products__image"
-                      loading="lazy"
-                      onError={(e) => { e.target.style.display = "none"; }}
-                    />
-                  ) : (
-                    <div className="products__image-placeholder" aria-hidden="true" />
-                  )}
-                  <div className="products__image-overlay" />
+                  <img
+                    src={categoryImages[index] || category.image}
+                    alt={category.name}
+                    className="products__image products__image--category"
+                    loading="lazy"
+                    onError={(event) => { event.currentTarget.style.display = "none"; }}
+                  />
                   <span className="products__index">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
 
                 <div className="products__body">
-                  <h3 className="products__name">{p.name}</h3>
-                  {p.description && (
+                  <h3 className="products__name">{category.name}</h3>
+                  {category.description && (
                     <p className="products__desc">
-                      {p.description.length > 120
-                        ? p.description.slice(0, 120) + "…"
-                        : p.description}
+                      {category.description.length > 120
+                        ? category.description.slice(0, 120) + "…"
+                        : category.description}
                     </p>
                   )}
-                  <Link to={buildHref(p)} className="products__link">
-                    View product
+                  <Link to={`/spare-parts/${category.slug}`} className="products__link">
+                    View spare parts
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5"
                       strokeLinecap="round" strokeLinejoin="round">
@@ -126,5 +139,4 @@ export default function Products() {
     </section>
   );
 }
-
 

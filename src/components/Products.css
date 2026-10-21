@@ -211,6 +211,12 @@
   transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.products__image--category {
+  object-fit: contain;
+  padding: 14px;
+  background: #fff;
+}
+
 .products__card:hover .products__image {
   transform: scale(1.08);
 }
