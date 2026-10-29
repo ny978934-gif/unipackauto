@@ -158,8 +158,10 @@ export default function QuoteRequests() {
       setDiscountNotices((current) => ({
         ...current,
         [request._id]: result.notificationSent
-          ? "Discount saved and updated quotation emailed to the customer."
-          : `Discount saved, but email delivery failed. ${result.notificationError || ""}`,
+          ? request.quotation?.sentAt
+            ? "Discount saved and revised quotation emailed to the customer."
+            : "Quotation finalized and emailed to the customer."
+          : `${request.quotation?.sentAt ? "Revised quotation" : "Quotation"} saved, but email delivery failed. ${result.notificationError || ""}`,
       }));
     } catch (updateError) {
       setError(updateError.message);
@@ -355,15 +357,19 @@ export default function QuoteRequests() {
                         disabled={updatingId === request._id}
                         onClick={() => saveDiscount(request)}
                       >
-                        {updatingId === request._id ? "Saving…" : "Save discount & email"}
+                        {updatingId === request._id
+                          ? "Finalizing…"
+                          : request.quotation?.sentAt
+                            ? "Save & email revised quotation"
+                            : "Finalize & email customer"}
                       </button>
                       <button
                         type="button"
                         className="secondary-btn"
-                        disabled={updatingId === request._id}
+                        disabled={updatingId === request._id || !request.quotation?.sentAt}
                         onClick={() => downloadQuotation(request)}
                       >
-                        Download PDF
+                        Download admin PDF
                       </button>
                     </div>
                     {discountNotices[request._id] && (

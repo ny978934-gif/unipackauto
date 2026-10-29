@@ -7,7 +7,6 @@ import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./components/pages/Home.jsx";
 import GetQuote from "./components/pages/GetQuote.jsx";
-import QuotationView from "./components/pages/QuotationView.jsx";
 import CartPage from "./components/pages/CartPage.jsx";
 import SpareParts from "./components/pages/spareparts/SpareParts.jsx";
 import MachineProducts from "./components/pages/products/Products.jsx";
@@ -28,7 +27,7 @@ import "./components/UnifiedTheme.css";
 function HashScroll() {
   const location = useLocation();
   useEffect(() => {
-    if (!location.hash || location.hash.startsWith("#customer-token=")) return;
+    if (!location.hash) return;
     const scrollToHash = () => {
       const target = document.querySelector(location.hash);
       if (!target) return;
@@ -53,7 +52,6 @@ function AppShell() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/get-quote" element={<GetQuote />} />
-          <Route path="/quotation/:quoteId" element={<QuotationView />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/products" element={<MachineProducts />} />
           <Route path="/products/:categorySlug" element={<Products type="machine" />} />

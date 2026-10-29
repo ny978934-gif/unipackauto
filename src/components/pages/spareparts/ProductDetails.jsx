@@ -133,7 +133,17 @@ export default function ProductDetails({ type = "sparepart" }) {
             <CloudinaryImage src={image} fallbackSrc={logo} alt={product.name} />
           </div>
           {galleryImages.length > 1 && (
-            <div className="product-image-thumbnails" aria-label="Product images">
+            <div
+              className={`product-image-gallery ${type === "sparepart" ? "product-image-gallery-sparepart" : ""}`}
+              role="group"
+              aria-label={`${galleryImages.length} images of ${product.name}`}
+            >
+              {type === "sparepart" && (
+                <p className="product-image-gallery-label">
+                  Product images <span>{galleryImages.length} photos</span>
+                </p>
+              )}
+              <div className="product-image-thumbnails">
               {galleryImages.map((imageUrl, index) => (
                 <button
                   className={`product-image-thumbnail ${image === imageUrl ? "active" : ""}`}
@@ -143,9 +153,11 @@ export default function ProductDetails({ type = "sparepart" }) {
                   aria-label={`Show image ${index + 1} of ${galleryImages.length}`}
                   aria-pressed={image === imageUrl}
                 >
-                  <CloudinaryImage src={imageUrl} fallbackSrc={logo} alt="" />
+                  <CloudinaryImage src={imageUrl} fallbackSrc={logo} alt="" loading="lazy" />
+                  <span>{index + 1}</span>
                 </button>
               ))}
+              </div>
             </div>
           )}
         </div>
