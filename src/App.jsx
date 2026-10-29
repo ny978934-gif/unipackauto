@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./components/pages/Home.jsx";
 import GetQuote from "./components/pages/GetQuote.jsx";
+import QuotationView from "./components/pages/QuotationView.jsx";
 import CartPage from "./components/pages/CartPage.jsx";
 import SpareParts from "./components/pages/spareparts/SpareParts.jsx";
 import MachineProducts from "./components/pages/products/Products.jsx";
@@ -15,7 +16,7 @@ import Products from "./components/pages/spareparts/Products3.jsx";
 import AdminLayout from "./admin/AdminLayout.jsx";
 import Dashboard from "./admin/Dashboard.jsx";
 import Categories from "./admin/Categories.jsx";
-import AdminProducts from "./admin/Products2.jsx";
+import SparePartsManagement from "./admin/Products2.jsx";
 import Inquiry from "./admin/Inquiry.jsx";
 import QuoteRequests from "./admin/QuoteRequests.jsx";
 import SparePartsUploader from "./admin/SparePartsUploader.jsx";
@@ -27,7 +28,7 @@ import "./components/UnifiedTheme.css";
 function HashScroll() {
   const location = useLocation();
   useEffect(() => {
-    if (!location.hash) return;
+    if (!location.hash || location.hash.startsWith("#customer-token=")) return;
     const scrollToHash = () => {
       const target = document.querySelector(location.hash);
       if (!target) return;
@@ -52,6 +53,7 @@ function AppShell() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/get-quote" element={<GetQuote />} />
+          <Route path="/quotation/:quoteId" element={<QuotationView />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/products" element={<MachineProducts />} />
           <Route path="/products/:categorySlug" element={<Products type="machine" />} />
@@ -67,8 +69,7 @@ function AppShell() {
             <Route element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="categories" element={<Categories />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="machines" element={<AdminProducts type="machine" />} />
+              <Route path="products" element={<SparePartsManagement />} />
               <Route path="inquiries" element={<Inquiry />} />
               <Route path="quote-requests" element={<QuoteRequests />} />
               <Route path="spare-parts-uploader" element={<SparePartsUploader />} />

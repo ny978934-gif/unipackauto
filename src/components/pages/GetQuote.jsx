@@ -35,33 +35,21 @@ function Field({ label, name, value, onChange, required = false, ...props }) {
 
 export default function GetQuote() {
   const location = useLocation();
-  const [quoteType, setQuoteType] = useState("sparePart");
   const [contact, setContact] = useState(initialContact);
   const [parts, setParts] = useState([blankPart()]);
-  const [machine, setMachine] = useState({ machineType: "", model: "", quantity: "1", specifications: "" });
   const [attachment, setAttachment] = useState(null);
   const [status, setStatus] = useState({ state: "idle", message: "" });
-  const [machineCategories, setMachineCategories] = useState([]);
   const [spareCategories, setSpareCategories] = useState([]);
   const [sparePartsByCategory, setSparePartsByCategory] = useState({});
   const formRef = useRef(null);
 
   useEffect(() => {
     const controller = new AbortController();
-    Promise.all([
-      fetch(`${API}/api/spare/categories?type=machine`, { signal: controller.signal }),
-      fetch(`${API}/api/spare/categories?type=sparepart`, { signal: controller.signal }),
-    ])
-      .then(async ([machineResponse, spareResponse]) => {
-        if (!machineResponse.ok || !spareResponse.ok) {
-          throw new Error("Quote categories could not be loaded.");
-        }
-        const [machineData, spareData] = await Promise.all([
-          machineResponse.json(),
-          spareResponse.json(),
-        ]);
-        if (Array.isArray(machineData)) setMachineCategories(machineData);
-        if (Array.isArray(spareData)) setSpareCategories(spareData);
+    fetch(`${API}/api/spare/categories?type=sparepart`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Quote categories could not be loaded.");
+        const data = await response.json();
+        if (Array.isArray(data)) setSpareCategories(data);
       })
       .catch((error) => {
         if (error.name !== "AbortError") console.error("Unable to load quote categories:", error);
@@ -107,24 +95,13 @@ export default function GetQuote() {
     const prefill = location.state?.quotePrefill;
     if (!prefill) return;
 
-    if (prefill.quoteType === "machine") {
-      setQuoteType("machine");
-      setMachine((current) => ({
-        ...current,
-        machineType: prefill.machineType || current.machineType,
-        model: prefill.model || current.model,
-      }));
-      return;
-    }
-
     const prefilledParts = Array.isArray(prefill.parts)
       ? prefill.parts
       : prefill.part
         ? [prefill.part]
         : [];
 
-    if (prefill.quoteType === "sparePart" && prefilledParts.length > 0) {
-      setQuoteType("sparePart");
+    if (prefilledParts.length > 0) {
       setParts((current) => {
         const incoming = prefilledParts.slice(0, 30).map((prefilledPart) => ({
           ...blankPart(),
@@ -192,21 +169,13 @@ export default function GetQuote() {
     });
   };
 
-  const updateMachine = (event) => {
-    setMachine((current) => ({ ...current, [event.target.name]: event.target.value }));
-  };
-
   const submitQuote = async (event) => {
     event.preventDefault();
     setStatus({ state: "loading", message: "" });
     const formData = new FormData();
-    formData.append("quoteType", quoteType);
+    formData.append("quoteType", "sparePart");
     Object.entries(contact).forEach(([key, value]) => formData.append(key, value));
-    if (quoteType === "sparePart") {
-      formData.append("parts", JSON.stringify(parts));
-    } else {
-      Object.entries(machine).forEach(([key, value]) => formData.append(key, value));
-    }
+    formData.append("parts", JSON.stringify(parts));
     if (attachment) formData.append("attachment", attachment);
 
     try {
@@ -221,7 +190,6 @@ export default function GetQuote() {
       });
       setContact(initialContact);
       setParts([blankPart()]);
-      setMachine({ machineType: "", model: "", quantity: "1", specifications: "" });
       setAttachment(null);
       formRef.current?.reset();
     } catch (error) {
@@ -233,15 +201,15 @@ export default function GetQuote() {
     <section className="get-quote-page">
       <div className="get-quote-intro">
         <span className="get-quote-eyebrow">UNIPACKAUTO · QUOTE DESK</span>
-        <h1>Let’s find the right solution for your business.</h1>
-        <p>Tell us what you need and our packaging machinery team will prepare a quote for you.</p>
+        <h1>Get a quotation for spare parts.</h1>
+        <p>Tell us which spare parts you need and our team will prepare a quotation for you.</p>
       </div>
 
       <div className="get-quote-shell">
         <aside className="get-quote-aside">
           <span className="quote-aside-mark" aria-hidden="true">U</span>
           <h2>Built around your requirement.</h2>
-          <p>Request pricing for a complete machine or list the spare parts you need. You can attach a drawing, specification sheet, or reference image.</p>
+          <p>List the spare parts you need. You can attach a drawing, specification sheet, or reference image.</p>
           <div className="quote-aside-note">
             <strong>Need help?</strong>
             <a href="tel:+919215521314">+91 92155 21314</a>
@@ -254,39 +222,11 @@ export default function GetQuote() {
             <div className="quote-form-heading">
               <div>
                 <span className="quote-form-kicker">START YOUR REQUEST</span>
-                <h2>What would you like a quote for?</h2>
+                <h2>Request a spare parts quotation</h2>
               </div>
             </div>
 
-            <div className="quote-type-switch" role="group" aria-label="Quote type">
-              <button
-                type="button"
-                className={quoteType === "sparePart" ? "selected" : ""}
-                aria-pressed={quoteType === "sparePart"}
-                onClick={() => setQuoteType("sparePart")}
-              >
-                <span aria-hidden="true">⚙</span>
-                Spare Part Quote
-              </button>
-              <button
-                type="button"
-                className={quoteType === "machine" ? "selected" : ""}
-                aria-pressed={quoteType === "machine"}
-                onClick={() => setQuoteType("machine")}
-              >
-                <span aria-hidden="true">▦</span>
-                Machine Quote
-              </button>
-            </div>
-
-            <datalist id="quote-machine-category-list">
-              {machineCategories.map((category) => (
-                <option key={category._id || category.name} value={category.name} />
-              ))}
-            </datalist>
-
-            {quoteType === "sparePart" ? (
-              <section className="quote-details-section">
+            <section className="quote-details-section">
                 <div className="quote-section-title">
                   <div><span>01</span><h3>Spare parts required</h3></div>
                   <p>Add one or more items to your request.</p>
@@ -375,33 +315,6 @@ export default function GetQuote() {
                   {parts.length >= 30 ? "Maximum 30 parts" : "Add Another Spare Part"}
                 </button>
               </section>
-            ) : (
-              <section className="quote-details-section">
-                <div className="quote-section-title">
-                  <div><span>01</span><h3>Machine requirement</h3></div>
-                  <p>Share the machine details you already know.</p>
-                </div>
-                <div className="quote-fields-grid">
-                  <label className="quote-field">
-                    <span>Machine type <b>*</b></span>
-                    <input
-                      name="machineType"
-                      list="quote-machine-category-list"
-                      value={machine.machineType}
-                      onChange={updateMachine}
-                      placeholder="e.g. Strapping machine"
-                      required
-                    />
-                  </label>
-                  <Field label="Model" name="model" value={machine.model} onChange={updateMachine} placeholder="Preferred model, if known" required />
-                  <Field label="Quantity" name="quantity" type="number" min="1" max="100000" value={machine.quantity} onChange={updateMachine} required />
-                  <label className="quote-field quote-field-wide">
-                    <span>Specifications</span>
-                    <textarea name="specifications" rows="4" value={machine.specifications} onChange={updateMachine} placeholder="Capacity, speed, product dimensions, power supply, or other requirements" />
-                  </label>
-                </div>
-              </section>
-            )}
 
             <section className="quote-details-section quote-contact-section">
               <div className="quote-section-title">

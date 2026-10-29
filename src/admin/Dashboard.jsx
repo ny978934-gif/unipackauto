@@ -88,8 +88,8 @@ const Dashboard = () => {
         <div className="quick-grid">
           <Link to="/admin/categories" className="quick-card">
             <div>
-              <h3>Manage Categories</h3>
-              <p>Organize machine categories</p>
+              <h3>Manage Spare Parts Categories</h3>
+              <p>Manage spare-parts machine categories</p>
             </div>
           </Link>
 
@@ -104,13 +104,6 @@ const Dashboard = () => {
             <div>
               <h3>Import Spare Parts</h3>
               <p>Upload Word or Excel files to add multiple parts</p>
-            </div>
-          </Link>
-
-          <Link to="/admin/machines" className="quick-card">
-            <div>
-              <h3>Manage Products / Machines</h3>
-              <p>Add, edit, delete, or import machines and their catalogue details</p>
             </div>
           </Link>
 

@@ -275,6 +275,111 @@
   line-height: 1.5;
 }
 
+.quote-discount-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 15px;
+  border: 1px solid var(--admin-border, #e6dfd3);
+  border-radius: 9px;
+  background: #fcfaf6;
+}
+
+.quote-discount-panel h4 {
+  margin: 0;
+  color: #312b22;
+  font-size: 14px;
+}
+
+.quote-discount-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.quote-discount-controls label {
+  display: grid;
+  gap: 6px;
+  color: #5f584e;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.quote-discount-controls input,
+.quote-discount-controls select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 39px;
+  padding: 8px 10px;
+  border: 1px solid var(--admin-border, #e6dfd3);
+  border-radius: 7px;
+  background: #fff;
+  font: inherit;
+}
+
+.quote-discount-totals {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.quote-discount-totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: #686158;
+  font-size: 12px;
+}
+
+.quote-discount-totals dd {
+  margin: 0;
+  color: #312b22;
+  font-variant-numeric: tabular-nums;
+}
+
+.quote-discount-totals .quote-discount-final {
+  padding-top: 8px;
+  border-top: 1px solid var(--admin-border, #e6dfd3);
+  color: #312b22;
+  font-weight: 750;
+}
+
+.quote-discount-final dd {
+  color: var(--admin-accent-hover, #624f37);
+  font-weight: 750;
+}
+
+.quote-discount-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.quote-discount-actions button {
+  min-height: 39px;
+  padding: 9px 13px;
+  border-radius: 7px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.quote-discount-actions .primary-btn {
+  border: 0;
+}
+
+.quote-discount-actions .secondary-btn {
+  border: 1px solid var(--admin-border, #d6cec1);
+  color: var(--admin-accent-hover, #624f37);
+  background: #fff;
+}
+
+.quote-discount-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 @media (max-width: 650px) {
   .quote-requests-title {
     align-items: flex-start;
@@ -300,6 +405,10 @@
   .quote-request-summary,
   .quote-request-filters,
   .quote-request-parts {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-discount-controls {
     grid-template-columns: 1fr;
   }
 

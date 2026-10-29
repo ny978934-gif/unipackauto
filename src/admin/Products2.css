@@ -1,0 +1,137 @@
+.spare-image-manager {
+  display: grid;
+  gap: 10px;
+}
+
+.spare-image-manager-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.spare-image-manager-heading small,
+.spare-image-file-details small {
+  color: #777;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.spare-image-editor {
+  display: grid;
+  grid-template-columns: 76px minmax(160px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--admin-border, #e6dfd3);
+  border-radius: 9px;
+  background: #fff;
+}
+
+.spare-image-preview {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 66px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #f6f1e7;
+  color: #777;
+  font-size: 11px;
+}
+
+.spare-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.spare-image-url input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--admin-border, #e6dfd3);
+  border-radius: 7px;
+  font: inherit;
+}
+
+.spare-image-file-details {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.spare-image-file-details strong {
+  overflow: hidden;
+  color: #312b22;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spare-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.spare-image-actions button {
+  min-height: 34px;
+}
+
+.spare-image-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.spare-add-image-url {
+  justify-self: start;
+}
+
+.admin-spare-image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 120px;
+}
+
+.admin-spare-image-list img {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--admin-border, #e6dfd3);
+  border-radius: 5px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 650px) {
+  .spare-image-editor {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .spare-image-preview {
+    width: 60px;
+    height: 58px;
+  }
+
+  .spare-image-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+}

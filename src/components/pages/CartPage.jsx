@@ -208,7 +208,7 @@ export default function CartPage() {
             )}
 
             <button className="cart-btn cart-btn--primary cart-btn--full" onClick={handleCheckout}>
-              Proceed to Quote →
+              Proceed to Order →
             </button>
             <Link to="/spare-parts" className="cart-btn cart-btn--outline cart-btn--full">
               ← Continue Shopping

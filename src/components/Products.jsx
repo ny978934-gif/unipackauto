@@ -31,6 +31,7 @@ const categoryImages = [
 export default function Products() {
   const [categories, setCategories] = useState([]);
   const [state, setState] = useState("loading"); // loading | ready | error
+  const homepageCategories = categories.slice(0, 10);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,9 +95,9 @@ export default function Products() {
         )}
 
         {/* Grid */}
-        {state === "ready" && categories.length > 0 && (
+        {state === "ready" && homepageCategories.length > 0 && (
           <div className="products__grid">
-            {categories.map((category, index) => (
+            {homepageCategories.map((category, index) => (
               <article className="products__card" key={category._id || category.slug}>
                 <div className="products__image-box">
                   <img
@@ -139,4 +140,3 @@ export default function Products() {
     </section>
   );
 }
-

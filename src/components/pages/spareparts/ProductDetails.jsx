@@ -56,29 +56,28 @@ export default function ProductDetails({ type = "sparepart" }) {
   }
 
   const galleryImages = [...new Set([
-    ...(Array.isArray(product.images) ? product.images : []),
-    product.image,
+    ...(type === "sparepart"
+      ? [product.image, ...(Array.isArray(product.images) ? product.images : [])]
+      : [...(Array.isArray(product.images) ? product.images : []), product.image]),
   ].filter((imageUrl) => typeof imageUrl === "string" && imageUrl.trim()))]
     .slice(0, type === "sparepart" ? 5 : 10);
   const image        = galleryImages.includes(activeImage) ? activeImage : galleryImages[0] || "";
   const categoryName = product.category?.name || categorySlug;
   const uom          = getProductUom(product);
 
-  // Build the prefill objects passed to /get-quote and /#contact
+  // Build the spare-part prefill passed to /get-quote.
   const buildQuotePrefill = (qty = quantity) =>
-    type === "machine"
-      ? { quoteType: "machine", machineType: categoryName, model: product.name }
-      : {
-          quoteType: "sparePart",
-          categorySlug,
-          part: {
-            machine:     categoryName,
-            categorySlug,
-            partId:      product._id,
-            partName:    product.name,
-            quantity:    String(qty),
-          },
-        };
+    ({
+      quoteType: "sparePart",
+      categorySlug,
+      part: {
+        machine: categoryName,
+        categorySlug,
+        partId: product._id,
+        partName: product.name,
+        quantity: String(qty),
+      },
+    });
 
   const enquiryPrefill = {
     productInterest: `${categoryName} — ${product.name}`,
@@ -138,7 +137,7 @@ export default function ProductDetails({ type = "sparepart" }) {
               {galleryImages.map((imageUrl, index) => (
                 <button
                   className={`product-image-thumbnail ${image === imageUrl ? "active" : ""}`}
-                  key={imageUrl}
+                  key={`${imageUrl}-${index}`}
                   type="button"
                   onClick={() => setActiveImage(imageUrl)}
                   aria-label={`Show image ${index + 1} of ${galleryImages.length}`}
@@ -221,13 +220,15 @@ export default function ProductDetails({ type = "sparepart" }) {
               </button>
             )}
 
-            <button
-              type="button"
-              className="product-quote-button"
-              onClick={handleAddToQuote}
-            >
-              Add to Quote
-            </button>
+            {type === "sparepart" && (
+              <button
+                type="button"
+                className="product-quote-button"
+                onClick={handleAddToQuote}
+              >
+                Add to Quote
+              </button>
+            )}
             <Link
               to="/#contact"
               state={{ enquiryPrefill }}

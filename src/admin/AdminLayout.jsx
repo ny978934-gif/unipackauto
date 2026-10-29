@@ -38,7 +38,7 @@ const AdminLayout = () => {
               isActive ? "admin-link active" : "admin-link"
             }
           >
-            Categories
+            Spare Parts Categories
           </NavLink>
 
           <NavLink
@@ -48,15 +48,6 @@ const AdminLayout = () => {
             }
           >
             Spare Parts Management
-          </NavLink>
-
-          <NavLink
-            to="/admin/machines"
-            className={({ isActive }) =>
-              isActive ? "admin-link active" : "admin-link"
-            }
-          >
-            Products / Machines
           </NavLink>
 
           <NavLink
@@ -104,7 +95,7 @@ const AdminLayout = () => {
 
           <div>
             <h3>Dashboard</h3>
-            <p>Manage your spare parts and machine catalogues</p>
+            <p>Manage spare parts and categories</p>
           </div>
 
           <div className="admin-profile">

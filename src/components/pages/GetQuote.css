@@ -128,45 +128,6 @@
   letter-spacing: -0.03em;
 }
 
-.quote-type-switch {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding: 6px;
-  background: #f5f1e9;
-  border: 1px solid var(--quote-line);
-  border-radius: 13px;
-}
-
-.quote-type-switch button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  min-height: 54px;
-  padding: 10px;
-  color: #695f50;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 9px;
-  font: inherit;
-  font-size: 0.93rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 160ms ease, box-shadow 160ms ease, color 160ms ease;
-}
-
-.quote-type-switch button > span {
-  font-size: 1.15rem;
-}
-
-.quote-type-switch button.selected {
-  color: var(--quote-ink);
-  background: #fff;
-  border-color: var(--quote-line);
-  box-shadow: 0 3px 10px rgba(74, 63, 47, 0.08);
-}
-
 .quote-details-section {
   display: grid;
   gap: 18px;
@@ -487,17 +448,6 @@
 
   .get-quote-form {
     gap: 24px;
-  }
-
-  .quote-type-switch {
-    gap: 4px;
-    padding: 4px;
-  }
-
-  .quote-type-switch button {
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.8rem;
   }
 
   .quote-section-title {
