@@ -37,11 +37,17 @@ const quotationPreview = (request, draft) => {
     discountPaise = Math.round(value * 100);
   }
   if (!Number.isSafeInteger(discountPaise) || discountPaise > grossPaise) return null;
+  const discountPercentage = draft.discountType === "percentage"
+    ? Math.round(value * 100) / 100
+    : grossPaise
+      ? Number((BigInt(discountPaise) * 10000n + BigInt(grossPaise) / 2n) / BigInt(grossPaise)) / 100
+      : 0;
   return {
     subtotal: request.quotation.subtotalCents,
     gst: request.quotation.gstCents,
     gross: grossPaise,
     discount: discountPaise,
+    discountPercentage,
     final: grossPaise - discountPaise,
   };
 };
@@ -344,11 +350,11 @@ export default function QuoteRequests() {
                       const preview = quotationPreview(request, getDiscountDraft(request));
                       return preview ? (
                         <dl className="quote-discount-totals">
-                          <div><dt>Subtotal</dt><dd>{moneyPaise(preview.subtotal)}</dd></div>
+                          <div><dt>Net Total</dt><dd>{moneyPaise(preview.subtotal)}</dd></div>
                           <div><dt>GST (18%)</dt><dd>{moneyPaise(preview.gst)}</dd></div>
-                          <div><dt>Total including GST</dt><dd>{moneyPaise(preview.gross)}</dd></div>
-                          <div><dt>Discount</dt><dd>−{moneyPaise(preview.discount)}</dd></div>
-                          <div className="quote-discount-final"><dt>Final amount due</dt><dd>{moneyPaise(preview.final)}</dd></div>
+                          <div><dt>Gross Total</dt><dd>{moneyPaise(preview.gross)}</dd></div>
+                          <div><dt>Discount ({preview.discountPercentage.toFixed(2)}%)</dt><dd>−{moneyPaise(preview.discount)}</dd></div>
+                          <div className="quote-discount-final"><dt>Final Payable Amount</dt><dd>{moneyPaise(preview.final)}</dd></div>
                         </dl>
                       ) : <p className="quote-request-message">Quotation pricing will be calculated when you save.</p>;
                     })()}

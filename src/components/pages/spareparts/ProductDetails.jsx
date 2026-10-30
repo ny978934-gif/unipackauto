@@ -4,7 +4,6 @@ import { API, formatPrice, getProductUom } from "../../../spareApi";
 import { useAuth } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
 import { useQuoteCart } from "../../../context/QuoteCartContext";
-import logo from "../../../assests/logo.jpeg";
 import CloudinaryImage from "./CloudinaryImage";
 import { getProductGalleryImages } from "./productGallery";
 import "./ProductDetails.css";
@@ -126,7 +125,7 @@ export default function ProductDetails({ type = "sparepart" }) {
       <section className="product-main">
         <div className="product-gallery">
           <div className="product-image-box">
-            <CloudinaryImage src={image} fallbackSrc={logo} alt={product.name} />
+            <CloudinaryImage src={image} alt={product.name} />
           </div>
           {galleryImages.length > 1 && (
             <div
@@ -149,7 +148,7 @@ export default function ProductDetails({ type = "sparepart" }) {
                   aria-label={`Show image ${index + 1} of ${galleryImages.length}`}
                   aria-pressed={image === imageUrl}
                 >
-                  <CloudinaryImage src={imageUrl} fallbackSrc={logo} alt="" loading="lazy" />
+                  <CloudinaryImage src={imageUrl} alt="" loading="lazy" />
                   <span>{index + 1}</span>
                 </button>
               ))}

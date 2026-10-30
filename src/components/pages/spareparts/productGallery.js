@@ -2,8 +2,8 @@ export function getProductGalleryImages(product, type = "sparepart") {
   const savedImages = (Array.isArray(product.images) ? product.images : [])
     .filter((imageUrl) => typeof imageUrl === "string" && imageUrl.trim())
     .map((imageUrl) => imageUrl.trim());
-  const productImages = type === "sparepart" && savedImages.length
-    ? savedImages
+  const productImages = type === "sparepart"
+    ? [product.image, ...savedImages]
     : [...savedImages, product.image];
 
   return [...new Set(
