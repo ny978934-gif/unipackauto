@@ -157,10 +157,12 @@ export default function QuoteRequests() {
       }));
       setDiscountNotices((current) => ({
         ...current,
-        [request._id]: result.notificationSent
+        [request._id]: result.alreadySent
+          ? "This quotation was already emailed with the current discount; no duplicate email was sent."
+          : result.notificationSent
           ? request.quotation?.sentAt
-            ? "Discount saved and revised quotation emailed to the customer."
-            : "Quotation finalized and emailed to the customer."
+            ? "Discount saved and revised quotation emailed to the owner and customer."
+            : "Quotation finalized and emailed to the owner and customer."
           : `${request.quotation?.sentAt ? "Revised quotation" : "Quotation"} saved, but email delivery failed. ${result.notificationError || ""}`,
       }));
     } catch (updateError) {

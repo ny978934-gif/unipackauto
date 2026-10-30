@@ -6,6 +6,7 @@ import { useCart } from "../../../context/CartContext";
 import { useQuoteCart } from "../../../context/QuoteCartContext";
 import logo from "../../../assests/logo.jpeg";
 import CloudinaryImage from "./CloudinaryImage";
+import { getProductGalleryImages } from "./productGallery";
 import "./ProductDetails.css";
 
 export default function ProductDetails({ type = "sparepart" }) {
@@ -55,12 +56,7 @@ export default function ProductDetails({ type = "sparepart" }) {
     );
   }
 
-  const galleryImages = [...new Set([
-    ...(type === "sparepart"
-      ? [product.image, ...(Array.isArray(product.images) ? product.images : [])]
-      : [...(Array.isArray(product.images) ? product.images : []), product.image]),
-  ].filter((imageUrl) => typeof imageUrl === "string" && imageUrl.trim()))]
-    .slice(0, type === "sparepart" ? 5 : 10);
+  const galleryImages = getProductGalleryImages(product, type);
   const image        = galleryImages.includes(activeImage) ? activeImage : galleryImages[0] || "";
   const categoryName = product.category?.name || categorySlug;
   const uom          = getProductUom(product);

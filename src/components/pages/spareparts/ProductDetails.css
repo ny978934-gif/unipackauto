@@ -105,6 +105,16 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.product-image-thumbnail:hover {
+  border-color: #4a3f2f;
+}
+
+.product-image-thumbnail:focus-visible {
+  outline: 3px solid #1d5fa7;
+  outline-offset: 2px;
 }
 
 .product-image-gallery-sparepart .product-image-thumbnail {
