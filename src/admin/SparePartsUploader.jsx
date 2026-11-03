@@ -165,10 +165,10 @@ export default function SparePartsUploader() {
         <div className="sp-import-fields-hint">
           <span>Required column:</span><code>Part Name</code>
           <span>Recognized columns:</span>
-          <code>Spare Image</code><code>Price</code><code>UOM</code>
+          <code>Part Code</code><code>Spare Image</code><code>Price</code><code>UOM</code>
         </div>
         <p className="sp-import-help">
-          Excel sheet names are ignored. The importer scans all sheets for a table with a Part Name column and imports its rows into the selected machine category. Spare Image, Price, and UOM columns are optional. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
+          Excel uploads support up to 5,000 parts per file. Existing parts in the selected category are skipped; invalid rows are reported without blocking other rows. Excel sheet names are ignored. The importer scans all sheets for a table with a Part Name column and imports its rows into the selected machine category. Part Code, Spare Image, Price, and UOM columns are optional. Word files can contain a table with a header row or labeled fields such as “Part Name: …”.
         </p>
         <button className="primary-btn sp-import-submit-btn" type="submit" disabled={!categoryId || !file || uploading}>
           {uploading
@@ -179,34 +179,55 @@ export default function SparePartsUploader() {
         </button>
       </form>
 
-      {imported?.products?.length > 0 && (
+      {imported && (
         <section className="admin-table-card sp-import-results">
           <div className="table-header">
-            <h2>Imported spare parts</h2>
-            <span>{imported.products.length}</span>
+            <h2>Import results</h2>
+            <span>{imported.counts?.imported ?? imported.products?.length ?? 0} imported</span>
           </div>
-          <div className="sp-import-category-link">
-            Category: <Link to={`/spare-parts/${imported.category.slug}`}>{imported.category.name} — View all spare parts</Link>
-          </div>
-          <div className="table-wrapper">
-            <table>
-              <thead><tr><th>Machine name</th><th>Spare part name</th><th>Spare image</th><th>Price</th><th>UOM</th></tr></thead>
-              <tbody>
-                {imported.products.map((product) => (
-                  <tr key={product._id}>
-                    <td>{imported.category.name}</td>
-                    <td><strong>{product.name}</strong></td>
-                    <td>{product.image || product.images?.[0]
-                      ? <img className="admin-product-image-preview" src={product.image || product.images[0]} alt={`${product.name} spare part`} />
-                      : "—"}
-                    </td>
-                    <td>{product.price > 0 ? formatPrice(product.price) : "—"}</td>
-                    <td>{product.uom || "—"}</td>
-                  </tr>
+          <p>
+            Imported: {imported.counts?.imported ?? imported.products?.length ?? 0}
+            {" · "}Duplicates skipped: {imported.counts?.duplicate ?? 0}
+            {" · "}Failed: {imported.counts?.failed ?? 0}
+          </p>
+          {imported.category && (
+            <div className="sp-import-category-link">
+              Category: <Link to={`/spare-parts/${imported.category.slug}`}>{imported.category.name} — View all spare parts</Link>
+            </div>
+          )}
+          {imported.failedItems?.length > 0 && (
+            <>
+              {imported.counts?.failed > imported.failedItems.length && (
+                <p>Showing the first {imported.failedItems.length} failed rows.</p>
+              )}
+              <ul className="sp-import-failures">
+                {imported.failedItems.map((item) => (
+                  <li key={`${item.row}-${item.name}`}>Row {item.row}{item.name ? ` (${item.name})` : ""}: {item.reason}</li>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+            </>
+          )}
+          {imported.products?.length > 0 && (
+            <div className="table-wrapper">
+              <table>
+                <thead><tr><th>Machine name</th><th>Spare part name</th><th>Spare image</th><th>Price</th><th>UOM</th></tr></thead>
+                <tbody>
+                  {imported.products.map((product) => (
+                    <tr key={product._id}>
+                      <td>{imported.category?.name || "—"}</td>
+                      <td><strong>{product.name}</strong></td>
+                      <td>{product.image || product.images?.[0]
+                        ? <img className="admin-product-image-preview" src={product.image || product.images[0]} alt={`${product.name} spare part`} />
+                        : "—"}
+                      </td>
+                      <td>{product.price > 0 ? formatPrice(product.price) : "—"}</td>
+                      <td>{product.uom || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       )}
     </div>

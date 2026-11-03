@@ -24,31 +24,35 @@ const moneyPaise = (value) => new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 2,
 }).format((Number(value) || 0) / 100);
 
-const quotationPreview = (request, draft) => {
-  const grossPaise = request.quotation?.grossTotalCents;
-  if (!Number.isSafeInteger(grossPaise)) return null;
-  const value = Number(draft.discountValue);
-  if (!Number.isFinite(value) || value < 0) return null;
-  let discountPaise = 0;
-  if (draft.discountType === "percentage") {
-    const basisPoints = BigInt(Math.round(value * 100));
-    discountPaise = Number((BigInt(grossPaise) * basisPoints + 5000n) / 10000n);
-  } else if (draft.discountType === "fixed") {
-    discountPaise = Math.round(value * 100);
-  }
-  if (!Number.isSafeInteger(discountPaise) || discountPaise > grossPaise) return null;
-  const discountPercentage = draft.discountType === "percentage"
-    ? Math.round(value * 100) / 100
-    : grossPaise
-      ? Number((BigInt(discountPaise) * 10000n + BigInt(grossPaise) / 2n) / BigInt(grossPaise)) / 100
-      : 0;
+const quotationPreview = (request, discountValues) => {
+  const savedItems = request.quotation?.items;
+  if (!Array.isArray(savedItems) || savedItems.length !== discountValues.length) return null;
+  let subtotal = 0;
+  const items = savedItems.map((item, index) => {
+    const discountPercentage = Number(discountValues[index]);
+    const lineTotal = item.unitPricePaise * item.quantity;
+    if (!Number.isSafeInteger(lineTotal) || !Number.isFinite(discountPercentage) ||
+        discountPercentage < 0 || discountPercentage > 100) return null;
+    const basisPoints = BigInt(Math.round(discountPercentage * 100));
+    const discount = Number((BigInt(lineTotal) * basisPoints + 5000n) / 10000n);
+    const netTotal = lineTotal - discount;
+    subtotal += netTotal;
+    return {
+      discountPercentage: Math.round(discountPercentage * 100) / 100,
+      lineTotal,
+      discount,
+      netTotal,
+    };
+  });
+  if (items.some((item) => !item) || !Number.isSafeInteger(subtotal)) return null;
+  const gst = Number((BigInt(subtotal) * 18n + 50n) / 100n);
+  const final = subtotal + gst;
+  if (!Number.isSafeInteger(final)) return null;
   return {
-    subtotal: request.quotation.subtotalCents,
-    gst: request.quotation.gstCents,
-    gross: grossPaise,
-    discount: discountPaise,
-    discountPercentage,
-    final: grossPaise - discountPaise,
+    items,
+    subtotal,
+    gst,
+    final,
   };
 };
 
@@ -60,7 +64,7 @@ export default function QuoteRequests() {
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
   const [discountDrafts, setDiscountDrafts] = useState({});
-  const [discountNotices, setDiscountNotices] = useState({});
+  const [quotationNotices, setQuotationNotices] = useState({});
 
   const loadRequests = async (signal) => {
     setLoading(true);
@@ -121,53 +125,63 @@ export default function QuoteRequests() {
     }
   };
 
-  const getDiscountDraft = (request) => ({
-    discountType: request.quotation?.discountType || "none",
-    discountValue: String(request.quotation?.discountValue || 0),
-    ...discountDrafts[request._id],
-  });
+  const getDiscountDraft = (request) => request.parts.map((_part, index) =>
+    String(
+      discountDrafts[request._id]?.[index] ??
+      request.quotation?.items?.[index]?.discountPercentage ??
+      0
+    )
+  );
 
-  const updateDiscountDraft = (requestId, field, value) => {
+  const updateDiscountDraft = (requestId, index, value) => {
     setDiscountDrafts((current) => ({
       ...current,
-      [requestId]: { ...current[requestId], [field]: value },
+      [requestId]: {
+        ...current[requestId],
+        [index]: value,
+      },
     }));
-    setDiscountNotices((current) => ({ ...current, [requestId]: "" }));
+    setQuotationNotices((current) => ({ ...current, [requestId]: "" }));
   };
 
-  const saveDiscount = async (request) => {
-    const draft = getDiscountDraft(request);
+  const saveQuotation = async (request) => {
+    const discountDraft = getDiscountDraft(request);
+    const discountPercentages = discountDraft.map((value) => Number(value));
+    if (discountDraft.some((value) => !value.trim()) ||
+        discountPercentages.some((value) => !Number.isFinite(value) || value < 0 || value > 100)) {
+      setError("Enter a discount percentage from 0 to 100 for every spare part.");
+      return;
+    }
     setUpdatingId(request._id);
     setError("");
-    setDiscountNotices((current) => ({ ...current, [request._id]: "" }));
+    setQuotationNotices((current) => ({ ...current, [request._id]: "" }));
     try {
-      const response = await adminFetch(`${API}/api/quotes/${request._id}/discount`, {
+      const response = await adminFetch(`${API}/api/quotes/${request._id}/quotation`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          discountType: draft.discountType,
-          discountValue: Number(draft.discountValue),
-        }),
+        body: JSON.stringify({ discountPercentages }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Unable to update the quotation discount.");
+      if (!response.ok) throw new Error(result.message || "Unable to save the quotation.");
       setRequests((current) => current.map((item) =>
         item._id === request._id ? result.request : item
       ));
       setDiscountDrafts((current) => ({
         ...current,
-        [request._id]: {
-          discountType: result.request.quotation.discountType,
-          discountValue: String(result.request.quotation.discountValue),
-        },
+        [request._id]: Object.fromEntries(
+          result.request.quotation.items.map((item, index) => [
+            index,
+            String(item.discountPercentage),
+          ])
+        ),
       }));
-      setDiscountNotices((current) => ({
+      setQuotationNotices((current) => ({
         ...current,
         [request._id]: result.alreadySent
-          ? "This quotation was already emailed with the current discount; no duplicate email was sent."
+          ? "This quotation was already emailed with these item discounts; no duplicate email was sent."
           : result.notificationSent
           ? request.quotation?.sentAt
-            ? "Discount saved and revised quotation emailed to the owner and customer."
+            ? "Item discounts saved and revised quotation emailed to the owner and customer."
             : "Quotation finalized and emailed to the owner and customer."
           : `${request.quotation?.sentAt ? "Revised quotation" : "Quotation"} saved, but email delivery failed. ${result.notificationError || ""}`,
       }));
@@ -314,56 +328,61 @@ export default function QuoteRequests() {
                   </span>
                 </footer>
                 {request.quoteType === "sparePart" && (
-                  <section className="quote-discount-panel" aria-label={`Quotation discount for ${request.company}`}>
-                    <h4>Quotation discount</h4>
-                    <div className="quote-discount-controls">
-                      <label>
-                        <span>Discount type</span>
-                        <select
-                          value={getDiscountDraft(request).discountType}
-                          disabled={updatingId === request._id}
-                          onChange={(event) => {
-                            const nextType = event.target.value;
-                            updateDiscountDraft(request._id, "discountType", nextType);
-                            if (nextType === "none") updateDiscountDraft(request._id, "discountValue", "0");
-                          }}
-                        >
-                          <option value="none">No discount</option>
-                          <option value="percentage">Percentage</option>
-                          <option value="fixed">Fixed amount (₹)</option>
-                        </select>
-                      </label>
-                      <label>
-                        <span>{getDiscountDraft(request).discountType === "percentage" ? "Discount (%)" : "Discount amount (₹)"}</span>
-                        <input
-                          type="number"
-                          min="0"
-                          max={getDiscountDraft(request).discountType === "percentage" ? "100" : undefined}
-                          step="0.01"
-                          value={getDiscountDraft(request).discountValue}
-                          disabled={updatingId === request._id || getDiscountDraft(request).discountType === "none"}
-                          onChange={(event) => updateDiscountDraft(request._id, "discountValue", event.target.value)}
-                        />
-                      </label>
-                    </div>
+                  <section className="quote-discount-panel" aria-label={`Quotation items for ${request.company}`}>
+                    <h4>Quotation items &amp; discounts</h4>
                     {(() => {
-                      const preview = quotationPreview(request, getDiscountDraft(request));
-                      return preview ? (
-                        <dl className="quote-discount-totals">
-                          <div><dt>Net Total</dt><dd>{moneyPaise(preview.subtotal)}</dd></div>
-                          <div><dt>GST (18%)</dt><dd>{moneyPaise(preview.gst)}</dd></div>
-                          <div><dt>Gross Total</dt><dd>{moneyPaise(preview.gross)}</dd></div>
-                          <div><dt>Discount ({preview.discountPercentage.toFixed(2)}%)</dt><dd>−{moneyPaise(preview.discount)}</dd></div>
-                          <div className="quote-discount-final"><dt>Final Payable Amount</dt><dd>{moneyPaise(preview.final)}</dd></div>
-                        </dl>
-                      ) : <p className="quote-request-message">Quotation pricing will be calculated when you save.</p>;
+                      const discounts = getDiscountDraft(request);
+                      const preview = quotationPreview(request, discounts);
+                      return (
+                        <>
+                          <div className="quote-discount-items">
+                            {request.parts.map((part, index) => {
+                              const item = preview?.items[index];
+                              const savedItem = request.quotation?.items?.[index];
+                              return (
+                                <div className="quote-discount-item" key={`${request._id}-discount-${index}`}>
+                                  <div className="quote-discount-item-details">
+                                    <strong>{part.partName} <small>× {part.quantity}</small></strong>
+                                    {savedItem && item && (
+                                      <span>
+                                        Unit price {moneyPaise(savedItem.unitPricePaise)} · Line total {moneyPaise(item?.lineTotal)} ·
+                                        Discount {moneyPaise(item?.discount)} · Net {moneyPaise(item?.netTotal)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <label>
+                                    <span>Discount (%)</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      step="0.01"
+                                      value={discounts[index]}
+                                      disabled={updatingId === request._id}
+                                      aria-label={`Discount percentage for ${part.partName}`}
+                                      onChange={(event) => updateDiscountDraft(request._id, index, event.target.value)}
+                                    />
+                                  </label>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          {preview ? (
+                            <dl className="quote-discount-totals">
+                              <div><dt>Subtotal after item discounts</dt><dd>{moneyPaise(preview.subtotal)}</dd></div>
+                              <div><dt>GST (18%)</dt><dd>{moneyPaise(preview.gst)}</dd></div>
+                              <div className="quote-discount-final"><dt>Final amount including GST</dt><dd>{moneyPaise(preview.final)}</dd></div>
+                            </dl>
+                          ) : <p className="quote-request-message">Quotation pricing will be calculated when you save.</p>}
+                        </>
+                      );
                     })()}
                     <div className="quote-discount-actions">
                       <button
                         type="button"
                         className="primary-btn"
                         disabled={updatingId === request._id}
-                        onClick={() => saveDiscount(request)}
+                        onClick={() => saveQuotation(request)}
                       >
                         {updatingId === request._id
                           ? "Finalizing…"
@@ -380,8 +399,8 @@ export default function QuoteRequests() {
                         Download admin PDF
                       </button>
                     </div>
-                    {discountNotices[request._id] && (
-                      <p className="quote-request-success" role="status">{discountNotices[request._id]}</p>
+                    {quotationNotices[request._id] && (
+                      <p className="quote-request-success" role="status">{quotationNotices[request._id]}</p>
                     )}
                   </section>
                 )}

@@ -291,13 +291,42 @@
   font-size: 14px;
 }
 
-.quote-discount-controls {
+.quote-discount-items {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 9px;
 }
 
-.quote-discount-controls label {
+.quote-discount-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 11px;
+  border: 1px solid var(--admin-border, #e6dfd3);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.quote-discount-item-details {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: #686158;
+  font-size: 12px;
+}
+
+.quote-discount-item-details strong {
+  color: #312b22;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.quote-discount-item-details span {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.quote-discount-item label {
   display: grid;
   gap: 6px;
   color: #5f584e;
@@ -305,8 +334,7 @@
   font-weight: 650;
 }
 
-.quote-discount-controls input,
-.quote-discount-controls select {
+.quote-discount-item input {
   box-sizing: border-box;
   width: 100%;
   min-height: 39px;
@@ -408,7 +436,7 @@
     grid-template-columns: 1fr;
   }
 
-  .quote-discount-controls {
+  .quote-discount-item {
     grid-template-columns: 1fr;
   }
 
