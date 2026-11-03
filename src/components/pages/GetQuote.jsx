@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { API } from "../../spareApi";
+import { useCart } from "../../context/CartContext";
+import { useQuoteCart } from "../../context/QuoteCartContext";
 import "./GetQuote.css";
 
 const blankPart = () => ({
@@ -35,6 +37,8 @@ function Field({ label, name, value, onChange, required = false, ...props }) {
 
 export default function GetQuote() {
   const location = useLocation();
+  const { clearCart } = useCart();
+  const { clearCart: clearQuoteCart } = useQuoteCart();
   const [contact, setContact] = useState(initialContact);
   const [parts, setParts] = useState([blankPart()]);
   const [attachment, setAttachment] = useState(null);
@@ -182,16 +186,27 @@ export default function GetQuote() {
       const response = await fetch(`${API}/api/quotes`, { method: "POST", body: formData });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Your quote request could not be sent.");
-      setStatus({
-        state: "success",
-        message: result.notificationSent === false
-          ? "Your quote request was saved. Email notification could not be delivered, but your request is safely recorded."
-          : "Thank you. Your quote request has been received and our team will be in touch.",
-      });
+
       setContact(initialContact);
       setParts([blankPart()]);
       setAttachment(null);
       formRef.current?.reset();
+      clearQuoteCart();
+
+      let cartClearWarning = "";
+      try {
+        await clearCart();
+      } catch (error) {
+        console.error("Quote request was saved, but the server cart could not be cleared:", error);
+        cartClearWarning = " Your request was saved, but we could not clear your account cart. Please try clearing it from the cart page.";
+      }
+
+      setStatus({
+        state: "success",
+        message: `${result.notificationSent === false
+          ? "Your quote request was saved. Email notification could not be delivered, but your request is safely recorded."
+          : "Thank you. Your quote request has been received and our team will be in touch."}${cartClearWarning}`,
+      });
     } catch (error) {
       setStatus({ state: "error", message: error.message || "Your quote request could not be sent." });
     }

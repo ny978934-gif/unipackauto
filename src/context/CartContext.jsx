@@ -88,7 +88,13 @@ export function CartProvider({ children }) {
   }, [fetchCart]);
 
   const clearCart = useCallback(async () => {
-    await userFetch(`${API}/api/cart`, { method: "DELETE" });
+    if (getUserToken()) {
+      const response = await userFetch(`${API}/api/cart`, { method: "DELETE" });
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || "Could not clear cart.");
+      }
+    }
     dispatch({ type: "CLEAR" });
   }, []);
 
