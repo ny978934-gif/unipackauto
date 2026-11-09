@@ -120,6 +120,13 @@ const Dashboard = () => {
               <p>{stats.quoteRequests} total, {stats.newQuoteRequests} new machine and spare-part requests</p>
             </div>
           </Link>
+
+          <Link to="/admin/users" className="quick-card">
+            <div>
+              <h3>User Management</h3>
+              <p>Create customer accounts, manage access, and assign inquiries and quotes.</p>
+            </div>
+          </Link>
         </div>
       </div>
 

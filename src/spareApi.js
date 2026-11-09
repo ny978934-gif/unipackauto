@@ -1,5 +1,6 @@
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const ADMIN_TOKEN_KEY = "unipack-admin-token";
+const USER_TOKEN_KEY = "unipack-user-token";
 
 function getAdminToken() {
   return window.sessionStorage.getItem(ADMIN_TOKEN_KEY);
@@ -13,16 +14,36 @@ function clearAdminToken() {
   window.sessionStorage.removeItem(ADMIN_TOKEN_KEY);
 }
 
-async function adminFetch(url, options = {}) {
+function getUserToken() {
+  return window.localStorage.getItem(USER_TOKEN_KEY);
+}
+
+function setUserToken(token) {
+  window.localStorage.setItem(USER_TOKEN_KEY, token);
+}
+
+function clearUserToken() {
+  window.localStorage.removeItem(USER_TOKEN_KEY);
+}
+
+const authenticatedFetch = async (url, options, getToken, clearToken, eventName) => {
   const headers = new Headers(options.headers || {});
-  const token = getAdminToken();
+  const token = getToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
   const response = await fetch(url, { ...options, headers });
   if (response.status === 401 && token) {
-    clearAdminToken();
-    window.dispatchEvent(new Event("admin-auth-expired"));
+    clearToken();
+    window.dispatchEvent(new Event(eventName));
   }
   return response;
+};
+
+function adminFetch(url, options = {}) {
+  return authenticatedFetch(url, options, getAdminToken, clearAdminToken, "admin-auth-expired");
+}
+
+function userFetch(url, options = {}) {
+  return authenticatedFetch(url, options, getUserToken, clearUserToken, "user-auth-expired");
 }
 
 function formatPrice(price) {
@@ -70,9 +91,13 @@ export {
   API,
   adminFetch,
   clearAdminToken,
+  clearUserToken,
   formatPrice,
   getAdminToken,
   getProductUom,
+  getUserToken,
   readApiResponse,
   setAdminToken,
+  setUserToken,
+  userFetch,
 };

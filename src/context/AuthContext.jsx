@@ -1,25 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { API } from "../spareApi";
-
-const USER_TOKEN_KEY = "unipack-user-token";
+import {
+  API,
+  clearUserToken,
+  getUserToken,
+  setUserToken,
+  userFetch,
+} from "../spareApi";
 
 // ── Token helpers (localStorage — persists across tabs and refresh) ────────────
-export const getUserToken  = ()      => window.localStorage.getItem(USER_TOKEN_KEY);
-export const setUserToken  = (token) => window.localStorage.setItem(USER_TOKEN_KEY, token);
-export const clearUserToken = ()     => window.localStorage.removeItem(USER_TOKEN_KEY);
-
-/** Authenticated fetch for user routes. Clears token on 401. */
-export const userFetch = async (url, options = {}) => {
-  const headers = new Headers(options.headers || {});
-  const token = getUserToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  const response = await fetch(url, { ...options, headers });
-  if (response.status === 401 && token) {
-    clearUserToken();
-    window.dispatchEvent(new Event("user-auth-expired"));
-  }
-  return response;
-};
+export { getUserToken, setUserToken, clearUserToken, userFetch };
 
 // ── Context ───────────────────────────────────────────────────────────────────
 const AuthContext = createContext(null);
@@ -66,11 +55,11 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (email, userId, password) => {
     const res  = await fetch(`${API}/api/users/login`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ email, password }),
+      body:    JSON.stringify({ email, userId, password }),
     });
     const data = await res.json();
     if (!res.ok) throw data;

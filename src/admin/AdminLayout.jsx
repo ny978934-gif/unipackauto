@@ -77,6 +77,15 @@ const AdminLayout = () => {
             Spare Parts Import
           </NavLink>
 
+          <NavLink
+            to="/admin/users"
+            className={({ isActive }) =>
+              isActive ? "admin-link active" : "admin-link"
+            }
+          >
+            User Management
+          </NavLink>
+
         </nav>
 
         <div className="admin-sidebar-bottom">

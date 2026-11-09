@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { API } from "../../spareApi";
+import { API, userFetch } from "../../spareApi";
 import { useCart } from "../../context/CartContext";
 import { useQuoteCart } from "../../context/QuoteCartContext";
 import "./GetQuote.css";
@@ -183,7 +183,7 @@ export default function GetQuote() {
     if (attachment) formData.append("attachment", attachment);
 
     try {
-      const response = await fetch(`${API}/api/quotes`, { method: "POST", body: formData });
+      const response = await userFetch(`${API}/api/quotes`, { method: "POST", body: formData });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Your quote request could not be sent.");
 

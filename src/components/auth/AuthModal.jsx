@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import "./AuthModal.css";
@@ -14,6 +15,7 @@ import "./AuthModal.css";
 export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
   const { login, signup } = useAuth();
   const { fetchCart }     = useCart();
+  const navigate = useNavigate();
   const [tab,     setTab]     = useState(defaultTab);
   const [loading, setLoading] = useState(false);
   const [errors,  setErrors]  = useState({});
@@ -21,6 +23,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
 
   // Login form
   const [loginEmail,    setLoginEmail]    = useState("");
+  const [loginUserId,   setLoginUserId]   = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
   // Signup form
@@ -69,21 +72,22 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
     e.preventDefault();
     setErrors({});
     setGeneral("");
-    if (!loginEmail || !loginPassword) {
-      setGeneral("Please enter your email and password.");
+    if (!loginEmail || !loginUserId || !loginPassword) {
+      setGeneral("Please enter your email, User ID, and password.");
       return;
     }
     setLoading(true);
     try {
-      await login(loginEmail, loginPassword);
+      await login(loginEmail, loginUserId, loginPassword);
       await fetchCart();
       onClose();
+      navigate("/user", { replace: true });
     } catch (err) {
       setGeneral(err.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [login, loginEmail, loginPassword, fetchCart, onClose]);
+  }, [login, loginEmail, loginUserId, loginPassword, fetchCart, onClose, navigate]);
 
   const handleSignup = useCallback(async (e) => {
     e.preventDefault();
@@ -94,6 +98,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
       await signup(signupName, signupEmail, signupPassword, signupPhone, signupCompany);
       await fetchCart();
       onClose();
+      navigate("/user", { replace: true });
     } catch (err) {
       // Server may return field-level errors
       if (err.errors) {
@@ -122,7 +127,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
           <h2 className="auth-title">{tab === "login" ? "Welcome back" : "Create account"}</h2>
           <p className="auth-subtitle">
             {tab === "login"
-              ? "Log in to access your cart and order history."
+              ? "Log in with the credentials provided by your administrator."
               : "Join us to save your cart and request quotes faster."}
           </p>
         </div>
@@ -163,6 +168,20 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
                 placeholder="you@company.com"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="auth-login-user-id">User ID</label>
+              <input
+                id="auth-login-user-id"
+                type="text"
+                autoComplete="username"
+                placeholder="UPA-XXXXXXXXXXXX"
+                value={loginUserId}
+                onChange={(e) => setLoginUserId(e.target.value)}
                 disabled={loading}
                 required
               />
@@ -238,7 +257,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
             </div>
 
             <div className={`auth-field ${errors.password ? "auth-field--error" : ""}`}>
-              <label htmlFor="auth-signup-password">Password * <small>(min. 8 characters)</small></label>
+              <label htmlFor="auth-signup-password">Password * <small>(min. 12 characters)</small></label>
               <div className="auth-pwd-wrap">
                 <input
                   id="auth-signup-password"
@@ -247,6 +266,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = "login" }) {
                   placeholder="Choose a strong password"
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
+                  minLength={12}
+                  maxLength={72}
                   disabled={loading}
                   required
                 />

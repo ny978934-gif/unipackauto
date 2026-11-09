@@ -15,6 +15,8 @@ export default function Inquiry() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [users, setUsers] = useState([]);
+  const [updatingId, setUpdatingId] = useState("");
 
   const loadInquiries = async (signal) => {
     setLoading(true);
@@ -34,11 +36,45 @@ export default function Inquiry() {
     }
   };
 
+  const loadUsers = async (signal) => {
+    try {
+      const response = await adminFetch(`${API}/api/admin/users`, { signal });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load users for assignment.");
+      if (!Array.isArray(data)) throw new Error("The server returned invalid user data.");
+      setUsers(data.filter((user) => user.status === "active" && !user.deletedAt));
+    } catch (loadError) {
+      if (loadError.name !== "AbortError") setError(loadError.message);
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     loadInquiries(controller.signal);
+    loadUsers(controller.signal);
     return () => controller.abort();
   }, []);
+
+  const assignInquiry = async (inquiryId, assignedUserId) => {
+    setUpdatingId(inquiryId);
+    setError("");
+    try {
+      const response = await adminFetch(`${API}/api/inquiries/${inquiryId}/assign`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedUserId: assignedUserId || null }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to assign this inquiry.");
+      setInquiries((current) => current.map((inquiry) =>
+        inquiry._id === inquiryId ? result.inquiry : inquiry
+      ));
+    } catch (assignError) {
+      setError(assignError.message);
+    } finally {
+      setUpdatingId("");
+    }
+  };
 
   const filteredInquiries = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -148,6 +184,7 @@ export default function Inquiry() {
                   <th>Interested in</th>
                   <th>Message</th>
                   <th>Status</th>
+                  <th>Assigned user</th>
                 </tr>
               </thead>
               <tbody>
@@ -169,6 +206,25 @@ export default function Inquiry() {
                       <span className={`inquiry-status inquiry-status-${inquiry.status || "new"}`}>
                         {statusLabels[inquiry.status] || statusLabels.new}
                       </span>
+                    </td>
+                    <td>
+                      <select
+                        aria-label={`Assign inquiry from ${inquiry.name || inquiry.email}`}
+                        value={inquiry.assignedUser?._id || ""}
+                        disabled={updatingId === inquiry._id}
+                        onChange={(event) => assignInquiry(inquiry._id, event.target.value)}
+                      >
+                        <option value="">Unassigned</option>
+                        {inquiry.assignedUser?._id &&
+                          !users.some((user) => user._id === inquiry.assignedUser._id) && (
+                            <option value={inquiry.assignedUser._id} disabled>
+                              {inquiry.assignedUser.name || "Unavailable user"}
+                            </option>
+                          )}
+                        {users.map((user) => (
+                          <option key={user._id} value={user._id}>{user.name} · {user.userId}</option>
+                        ))}
+                      </select>
                     </td>
                   </tr>
                 ))}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { userFetch } from "../spareApi";
 import "./Contact.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -36,7 +37,7 @@ export default function Contact() {
     setStatus({ state: "loading", message: "" });
 
     try {
-      const res = await fetch(`${API_URL}/api/inquiries`, {
+      const res = await userFetch(`${API_URL}/api/inquiries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

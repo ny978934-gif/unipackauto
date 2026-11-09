@@ -65,6 +65,7 @@ export default function QuoteRequests() {
   const [updatingId, setUpdatingId] = useState("");
   const [discountDrafts, setDiscountDrafts] = useState({});
   const [quotationNotices, setQuotationNotices] = useState({});
+  const [users, setUsers] = useState([]);
 
   const loadRequests = async (signal) => {
     setLoading(true);
@@ -82,11 +83,45 @@ export default function QuoteRequests() {
     }
   };
 
+  const loadUsers = async (signal) => {
+    try {
+      const response = await adminFetch(`${API}/api/admin/users`, { signal });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load users for assignment.");
+      if (!Array.isArray(data)) throw new Error("The server returned invalid user data.");
+      setUsers(data.filter((user) => user.status === "active" && !user.deletedAt));
+    } catch (loadError) {
+      if (loadError.name !== "AbortError") setError(loadError.message);
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     loadRequests(controller.signal);
+    loadUsers(controller.signal);
     return () => controller.abort();
   }, []);
+
+  const assignRequest = async (requestId, assignedUserId) => {
+    setUpdatingId(requestId);
+    setError("");
+    try {
+      const response = await adminFetch(`${API}/api/quotes/${requestId}/assign`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedUserId: assignedUserId || null }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to assign this quote.");
+      setRequests((current) => current.map((request) =>
+        request._id === requestId ? result.request : request
+      ));
+    } catch (assignError) {
+      setError(assignError.message);
+    } finally {
+      setUpdatingId("");
+    }
+  };
 
   const visibleRequests = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -116,7 +151,9 @@ export default function QuoteRequests() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Unable to update request status.");
       setRequests((current) => current.map((request) =>
-        request._id === requestId ? result.request : request
+        request._id === requestId
+          ? { ...result.request, assignedUser: request.assignedUser }
+          : request
       ));
     } catch (updateError) {
       setError(updateError.message);
@@ -164,7 +201,9 @@ export default function QuoteRequests() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Unable to save the quotation.");
       setRequests((current) => current.map((item) =>
-        item._id === request._id ? result.request : item
+        item._id === request._id
+          ? { ...result.request, assignedUser: item.assignedUser }
+          : item
       ));
       setDiscountDrafts((current) => ({
         ...current,
@@ -297,6 +336,29 @@ export default function QuoteRequests() {
                   <a href={`tel:${request.phone}`}>{request.phone}</a>
                   <span>{[request.city, request.state].filter(Boolean).join(", ")}</span>
                 </div>
+
+                <label className="quote-status-control quote-assignment-control">
+                  <span>Assigned user</span>
+                  <select
+                    aria-label={`Assign quote for ${request.company}`}
+                    value={typeof request.assignedUser === "string"
+                      ? request.assignedUser
+                      : request.assignedUser?._id || ""}
+                    disabled={updatingId === request._id}
+                    onChange={(event) => assignRequest(request._id, event.target.value)}
+                  >
+                    <option value="">Unassigned</option>
+                    {request.assignedUser?._id &&
+                      !users.some((user) => user._id === request.assignedUser._id) && (
+                        <option value={request.assignedUser._id} disabled>
+                          {request.assignedUser.name || "Unavailable user"}
+                        </option>
+                      )}
+                    {users.map((user) => (
+                      <option key={user._id} value={user._id}>{user.name} · {user.userId}</option>
+                    ))}
+                  </select>
+                </label>
 
                 {request.quoteType === "machine" ? (
                   <div className="quote-request-details">

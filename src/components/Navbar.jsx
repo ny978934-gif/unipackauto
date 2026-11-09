@@ -236,8 +236,7 @@ export default function Navbar() {
                         <strong>{user.name}</strong>
                         <small>{user.email}</small>
                       </div>
-                      <Link to="/cart"    role="menuitem" className="nav-user-menu-item" onClick={() => setUserMenuOpen(false)}>🛒 My Cart {itemCount > 0 && <span className="nav-user-menu-badge">{itemCount}</span>}</Link>
-                      <Link to="/get-quote" role="menuitem" className="nav-user-menu-item" onClick={() => setUserMenuOpen(false)}>📋 Get a Quote</Link>
+                      <Link to="/user" role="menuitem" className="nav-user-menu-item" onClick={() => setUserMenuOpen(false)}>My Dashboard</Link>
                       <button type="button" role="menuitem" className="nav-user-menu-item nav-user-menu-logout" onClick={handleLogout}>
                         Sign Out
                       </button>
@@ -328,7 +327,7 @@ export default function Navbar() {
                     <span className="nav-user-avatar">{user.name.charAt(0).toUpperCase()}</span>
                     <span>{user.name}</span>
                   </div>
-                  <Link to="/cart" className="mobile-menu-link" onClick={closeMenus}>🛒 My Cart {itemCount > 0 && `(${itemCount})`}</Link>
+                  <Link to="/user" className="mobile-menu-link" onClick={closeMenus}>My Dashboard</Link>
                   <button type="button" className="mobile-logout-btn" onClick={handleLogout}>Sign Out</button>
                 </div>
               ) : (
