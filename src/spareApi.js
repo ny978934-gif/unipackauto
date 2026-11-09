@@ -1,6 +1,7 @@
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const ADMIN_TOKEN_KEY = "unipack-admin-token";
 const USER_TOKEN_KEY = "unipack-user-token";
+const PORTAL_TOKEN_KEY = "unipack-portal-token";
 
 function getAdminToken() {
   return window.sessionStorage.getItem(ADMIN_TOKEN_KEY);
@@ -15,6 +16,7 @@ function clearAdminToken() {
 }
 
 function getUserToken() {
+  migrateLegacyPortalToken();
   return window.localStorage.getItem(USER_TOKEN_KEY);
 }
 
@@ -24,6 +26,34 @@ function setUserToken(token) {
 
 function clearUserToken() {
   window.localStorage.removeItem(USER_TOKEN_KEY);
+}
+
+function getPortalToken() {
+  return window.sessionStorage.getItem(PORTAL_TOKEN_KEY) || migrateLegacyPortalToken();
+}
+
+function setPortalToken(token) {
+  window.sessionStorage.setItem(PORTAL_TOKEN_KEY, token);
+}
+
+function clearPortalToken() {
+  window.sessionStorage.removeItem(PORTAL_TOKEN_KEY);
+}
+
+function migrateLegacyPortalToken() {
+  const token = window.localStorage.getItem(USER_TOKEN_KEY);
+  if (!token) return null;
+  try {
+    const payloadText = token.split(".")[1];
+    if (!payloadText) return null;
+    const payload = JSON.parse(window.atob(payloadText.replace(/-/g, "+").replace(/_/g, "/")));
+    if (payload.portal !== true) return null;
+    window.localStorage.removeItem(USER_TOKEN_KEY);
+    window.sessionStorage.setItem(PORTAL_TOKEN_KEY, token);
+    return token;
+  } catch {
+    return null;
+  }
 }
 
 const authenticatedFetch = async (url, options, getToken, clearToken, eventName) => {
@@ -44,6 +74,10 @@ function adminFetch(url, options = {}) {
 
 function userFetch(url, options = {}) {
   return authenticatedFetch(url, options, getUserToken, clearUserToken, "user-auth-expired");
+}
+
+function portalFetch(url, options = {}) {
+  return authenticatedFetch(url, options, getPortalToken, clearPortalToken, "portal-auth-expired");
 }
 
 function formatPrice(price) {
@@ -93,11 +127,15 @@ export {
   clearAdminToken,
   clearUserToken,
   formatPrice,
+  clearPortalToken,
+  getPortalToken,
   getAdminToken,
   getProductUom,
   getUserToken,
+  portalFetch,
   readApiResponse,
   setAdminToken,
+  setPortalToken,
   setUserToken,
   userFetch,
 };

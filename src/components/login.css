@@ -28,6 +28,33 @@
   object-fit: contain;
 }
 
+.admin-login-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-bottom: 22px;
+  padding: 5px;
+  border-radius: 9px;
+  background: #f3f0f3;
+}
+
+.admin-login-options button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #555;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-login-options button.active {
+  background: #fff;
+  color: #66116f;
+  box-shadow: 0 1px 5px rgba(42, 25, 44, 0.12);
+}
+
 .admin-login-card h1 {
   margin: 0;
   color: #222;

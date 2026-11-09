@@ -22,7 +22,6 @@ import SparePartsUploader from "./admin/SparePartsUploader.jsx";
 import AdminLogin from "./components/login.jsx";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute.jsx";
 import UserManagement from "./admin/UserManagement.jsx";
-import UserLogin from "./user/UserLogin.jsx";
 import UserProtectedRoute from "./user/UserProtectedRoute.jsx";
 import UserDashboard from "./user/UserDashboard.jsx";
 import Catalog from "./components/catalog.jsx";
@@ -48,7 +47,7 @@ function HashScroll() {
 function AppShell() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
-  const isUser = location.pathname.startsWith("/user");
+  const isUser = location.pathname === "/user";
 
   return (
     <>
@@ -79,7 +78,6 @@ function AppShell() {
               <Route path="users" element={<UserManagement />} />
             </Route>
           </Route>
-          <Route path="/user/login" element={<UserLogin />} />
           <Route path="/user" element={<UserProtectedRoute />}>
             <Route index element={<UserDashboard />} />
           </Route>

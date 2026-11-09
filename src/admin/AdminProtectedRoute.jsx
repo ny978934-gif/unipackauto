@@ -4,7 +4,9 @@ import { API, adminFetch, getAdminToken } from "../spareApi";
 
 export default function AdminProtectedRoute() {
   const location = useLocation();
-  const [status, setStatus] = useState(getAdminToken() ? "checking" : "unauthenticated");
+  const [status, setStatus] = useState(
+    getAdminToken() ? "checking" : "unauthenticated"
+  );
   const [error, setError] = useState("");
 
   const verifySession = useCallback(async (signal) => {

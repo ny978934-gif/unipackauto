@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API, setUserToken, userFetch } from "../spareApi";
+import { API, portalFetch } from "../spareApi";
 import { useAuth } from "../context/AuthContext";
 import "./UserDashboard.css";
 
@@ -19,7 +19,7 @@ const quoteStatus = {
 };
 
 export default function UserDashboard() {
-  const { user, logout } = useAuth();
+  const { portalUser, portalLogout } = useAuth();
   const navigate = useNavigate();
   const [section, setSection] = useState("quotes");
   const [quotes, setQuotes] = useState([]);
@@ -27,10 +27,6 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState({ quotes: false, inquiries: false });
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmation, setConfirmation] = useState("");
-  const [passwordNotice, setPasswordNotice] = useState("");
 
   const loadSection = useCallback(async (target) => {
     if (loaded[target]) return;
@@ -38,7 +34,7 @@ export default function UserDashboard() {
     setError("");
     try {
       const endpoint = target === "quotes" ? "me/quotes" : "me/inquiries";
-      const response = await userFetch(`${API}/api/users/${endpoint}`);
+      const response = await portalFetch(`${API}/api/users/${endpoint}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || `Unable to load ${target}.`);
       if (target === "quotes") setQuotes(data.quotes);
@@ -56,34 +52,8 @@ export default function UserDashboard() {
   }, [section, loadSection]);
 
   const signOut = () => {
-    logout();
-    navigate("/user/login", { replace: true });
-  };
-
-  const changePassword = async (event) => {
-    event.preventDefault();
-    setError("");
-    setPasswordNotice("");
-    if (newPassword !== confirmation) {
-      setError("New password and confirmation do not match.");
-      return;
-    }
-    try {
-      const response = await userFetch(`${API}/api/users/me/password`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Could not change your password.");
-      setUserToken(data.token);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmation("");
-      setPasswordNotice(data.message);
-    } catch (passwordError) {
-      setError(passwordError.message || "Could not change your password.");
-    }
+    portalLogout();
+    navigate("/admin/login", { replace: true });
   };
 
   return (
@@ -93,7 +63,6 @@ export default function UserDashboard() {
         <nav aria-label="User dashboard">
           <button className={section === "quotes" ? "active" : ""} type="button" onClick={() => setSection("quotes")}>Quotes</button>
           <button className={section === "inquiries" ? "active" : ""} type="button" onClick={() => setSection("inquiries")}>Contact Queries</button>
-          <button className={section === "password" ? "active" : ""} type="button" onClick={() => setSection("password")}>Change Password</button>
           <button type="button" onClick={signOut}>Logout</button>
         </nav>
       </aside>
@@ -102,11 +71,11 @@ export default function UserDashboard() {
         <header className="user-dashboard-header">
           <div>
             <span className="user-dashboard-eyebrow">CUSTOMER PORTAL</span>
-            <h1>{section === "quotes" ? "Quotes" : section === "inquiries" ? "Contact Queries" : "Change Password"}</h1>
+            <h1>{section === "quotes" ? "Quotes" : "Contact Queries"}</h1>
           </div>
           <div className="user-dashboard-identity">
-            <strong>{user?.name}</strong>
-            <span>{user?.userId}</span>
+            <strong>{portalUser?.name}</strong>
+            <span>{portalUser?.userId}</span>
           </div>
         </header>
 
@@ -173,28 +142,6 @@ export default function UserDashboard() {
           </section>
         )}
 
-        {section === "password" && (
-          <section className="user-dashboard-content user-password-content">
-            <h2>Change your password</h2>
-            <p>Use a password of at least 12 characters. Passwords are securely hashed.</p>
-            {passwordNotice && <div className="user-dashboard-success" role="status">{passwordNotice}</div>}
-            <form onSubmit={changePassword}>
-              <label>
-                Current password
-                <input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} maxLength="1024" required />
-              </label>
-              <label>
-                New password
-                <input type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} minLength="12" maxLength="72" required />
-              </label>
-              <label>
-                Confirm new password
-                <input type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength="12" maxLength="72" required />
-              </label>
-              <button type="submit">Update password</button>
-            </form>
-          </section>
-        )}
       </section>
     </div>
   );
