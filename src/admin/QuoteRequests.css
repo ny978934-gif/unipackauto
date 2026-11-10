@@ -167,6 +167,25 @@
   font-size: 13px;
 }
 
+.quote-request-creator {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  margin: -5px 0 15px;
+  color: #6e685f;
+  font-size: 13px;
+}
+
+.quote-request-creator span {
+  font-weight: 650;
+}
+
+.quote-request-creator strong {
+  color: #302b24;
+  font-weight: 600;
+}
+
 .quote-request-contact a,
 .quote-request-card-foot a {
   color: var(--admin-accent-hover, #624f37);

@@ -15,7 +15,6 @@ export default function Inquiry({ portal = false }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [users, setUsers] = useState([]);
   const [updatingId, setUpdatingId] = useState("");
   const inquiryFetch = portal ? portalFetch : adminFetch;
   const inquiryUrl = portal ? `${API}/api/users/me/inquiries` : `${API}/api/inquiries`;
@@ -39,25 +38,11 @@ export default function Inquiry({ portal = false }) {
     }
   }, [inquiryFetch, inquiryUrl, portal]);
 
-  const loadUsers = useCallback(async (signal) => {
-    if (portal) return;
-    try {
-      const response = await adminFetch(`${API}/api/admin/users`, { signal });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to load users for assignment.");
-      if (!Array.isArray(data)) throw new Error("The server returned invalid user data.");
-      setUsers(data.filter((user) => user.status === "active" && !user.deletedAt));
-    } catch (loadError) {
-      if (loadError.name !== "AbortError") setError(loadError.message);
-    }
-  }, [portal]);
-
   useEffect(() => {
     const controller = new AbortController();
     loadInquiries(controller.signal);
-    loadUsers(controller.signal);
     return () => controller.abort();
-  }, [loadInquiries, loadUsers]);
+  }, [loadInquiries]);
 
   useEffect(() => {
     const refreshVisibleInquiries = () => {
@@ -71,22 +56,25 @@ export default function Inquiry({ portal = false }) {
     };
   }, [loadInquiries]);
 
-  const assignInquiry = async (inquiryId, assignedUserId) => {
+  const updateStatus = async (inquiryId, status) => {
     setUpdatingId(inquiryId);
     setError("");
     try {
-      const response = await adminFetch(`${API}/api/inquiries/${inquiryId}/assign`, {
+      const response = await inquiryFetch(
+        `${inquiryUrl}/${inquiryId}/status`,
+        {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assignedUserId: assignedUserId || null }),
-      });
+        body: JSON.stringify({ status }),
+        }
+      );
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Unable to assign this inquiry.");
+      if (!response.ok) throw new Error(result.message || "Unable to update inquiry status.");
       setInquiries((current) => current.map((inquiry) =>
         inquiry._id === inquiryId ? result.inquiry : inquiry
       ));
-    } catch (assignError) {
-      setError(assignError.message);
+    } catch (updateError) {
+      setError(updateError.message);
     } finally {
       setUpdatingId("");
     }
@@ -125,7 +113,7 @@ export default function Inquiry({ portal = false }) {
         <div>
           <h1>{portal ? "Contact inquiries" : "Customer inquiries"}</h1>
           <p>{portal
-            ? "View inquiries assigned to your account."
+            ? "View and manage the shared contact inquiry inbox."
             : "View messages submitted through the website contact form."}</p>
         </div>
         <button
@@ -202,7 +190,6 @@ export default function Inquiry({ portal = false }) {
                   <th>Interested in</th>
                   <th>Message</th>
                   <th>Status</th>
-                  {!portal && <th>Assigned user</th>}
                 </tr>
               </thead>
               <tbody>
@@ -221,31 +208,18 @@ export default function Inquiry({ portal = false }) {
                     <td>{inquiry.machineInterest || "—"}</td>
                     <td className="inquiry-message">{inquiry.message || "—"}</td>
                     <td>
-                      <span className={`inquiry-status inquiry-status-${inquiry.status || "new"}`}>
-                        {statusLabels[inquiry.status] || statusLabels.new}
-                      </span>
+                      <select
+                        className={`inquiry-status inquiry-status-${inquiry.status || "new"}`}
+                        aria-label={`Status for inquiry from ${inquiry.name || inquiry.email}`}
+                        value={inquiry.status || "new"}
+                        disabled={updatingId === inquiry._id}
+                        onChange={(event) => updateStatus(inquiry._id, event.target.value)}
+                      >
+                        {Object.entries(statusLabels).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))}
+                      </select>
                     </td>
-                    {!portal && (
-                      <td>
-                        <select
-                          aria-label={`Assign inquiry from ${inquiry.name || inquiry.email}`}
-                          value={inquiry.assignedUser?._id || ""}
-                          disabled={updatingId === inquiry._id}
-                          onChange={(event) => assignInquiry(inquiry._id, event.target.value)}
-                        >
-                          <option value="">Unassigned</option>
-                          {inquiry.assignedUser?._id &&
-                            !users.some((user) => user._id === inquiry.assignedUser._id) && (
-                              <option value={inquiry.assignedUser._id} disabled>
-                                {inquiry.assignedUser.name || "Unavailable user"}
-                              </option>
-                            )}
-                          {users.map((user) => (
-                            <option key={user._id} value={user._id}>{user.name} · {user.userId}</option>
-                          ))}
-                        </select>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>
