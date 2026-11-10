@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { API, adminFetch } from "../spareApi";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { API, adminFetch, portalFetch } from "../spareApi";
 import "./AdminPages.css";
 import "./Inquiry.css";
 
@@ -9,7 +9,7 @@ const statusLabels = {
   closed: "Closed",
 };
 
-export default function Inquiry() {
+export default function Inquiry({ portal = false }) {
   const [inquiries, setInquiries] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -17,26 +17,30 @@ export default function Inquiry() {
   const [error, setError] = useState("");
   const [users, setUsers] = useState([]);
   const [updatingId, setUpdatingId] = useState("");
+  const inquiryFetch = portal ? portalFetch : adminFetch;
+  const inquiryUrl = portal ? `${API}/api/users/me/inquiries` : `${API}/api/inquiries`;
 
-  const loadInquiries = async (signal) => {
+  const loadInquiries = useCallback(async (signal) => {
     setLoading(true);
     setError("");
     try {
-      const response = await adminFetch(`${API}/api/inquiries`, { signal });
+      const response = await inquiryFetch(inquiryUrl, { signal });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || data.message || "Unable to load inquiries.");
       }
-      if (!Array.isArray(data)) throw new Error("The server returned invalid inquiry data.");
-      setInquiries(data);
+      const loadedInquiries = portal ? data.inquiries : data;
+      if (!Array.isArray(loadedInquiries)) throw new Error("The server returned invalid inquiry data.");
+      setInquiries(loadedInquiries);
     } catch (loadError) {
       if (loadError.name !== "AbortError") setError(loadError.message);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
-  };
+  }, [inquiryFetch, inquiryUrl, portal]);
 
-  const loadUsers = async (signal) => {
+  const loadUsers = useCallback(async (signal) => {
+    if (portal) return;
     try {
       const response = await adminFetch(`${API}/api/admin/users`, { signal });
       const data = await response.json();
@@ -46,14 +50,26 @@ export default function Inquiry() {
     } catch (loadError) {
       if (loadError.name !== "AbortError") setError(loadError.message);
     }
-  };
+  }, [portal]);
 
   useEffect(() => {
     const controller = new AbortController();
     loadInquiries(controller.signal);
     loadUsers(controller.signal);
     return () => controller.abort();
-  }, []);
+  }, [loadInquiries, loadUsers]);
+
+  useEffect(() => {
+    const refreshVisibleInquiries = () => {
+      if (document.visibilityState === "visible") loadInquiries();
+    };
+    const timer = window.setInterval(refreshVisibleInquiries, 15000);
+    document.addEventListener("visibilitychange", refreshVisibleInquiries);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshVisibleInquiries);
+    };
+  }, [loadInquiries]);
 
   const assignInquiry = async (inquiryId, assignedUserId) => {
     setUpdatingId(inquiryId);
@@ -107,8 +123,10 @@ export default function Inquiry() {
     <div className="admin-page inquiry-page">
       <div className="page-title inquiry-page-title">
         <div>
-          <h1>Customer inquiries</h1>
-          <p>View messages submitted through the website contact form.</p>
+          <h1>{portal ? "Contact inquiries" : "Customer inquiries"}</h1>
+          <p>{portal
+            ? "View inquiries assigned to your account."
+            : "View messages submitted through the website contact form."}</p>
         </div>
         <button
           type="button"
@@ -184,7 +202,7 @@ export default function Inquiry() {
                   <th>Interested in</th>
                   <th>Message</th>
                   <th>Status</th>
-                  <th>Assigned user</th>
+                  {!portal && <th>Assigned user</th>}
                 </tr>
               </thead>
               <tbody>
@@ -207,25 +225,27 @@ export default function Inquiry() {
                         {statusLabels[inquiry.status] || statusLabels.new}
                       </span>
                     </td>
-                    <td>
-                      <select
-                        aria-label={`Assign inquiry from ${inquiry.name || inquiry.email}`}
-                        value={inquiry.assignedUser?._id || ""}
-                        disabled={updatingId === inquiry._id}
-                        onChange={(event) => assignInquiry(inquiry._id, event.target.value)}
-                      >
-                        <option value="">Unassigned</option>
-                        {inquiry.assignedUser?._id &&
-                          !users.some((user) => user._id === inquiry.assignedUser._id) && (
-                            <option value={inquiry.assignedUser._id} disabled>
-                              {inquiry.assignedUser.name || "Unavailable user"}
-                            </option>
-                          )}
-                        {users.map((user) => (
-                          <option key={user._id} value={user._id}>{user.name} · {user.userId}</option>
-                        ))}
-                      </select>
-                    </td>
+                    {!portal && (
+                      <td>
+                        <select
+                          aria-label={`Assign inquiry from ${inquiry.name || inquiry.email}`}
+                          value={inquiry.assignedUser?._id || ""}
+                          disabled={updatingId === inquiry._id}
+                          onChange={(event) => assignInquiry(inquiry._id, event.target.value)}
+                        >
+                          <option value="">Unassigned</option>
+                          {inquiry.assignedUser?._id &&
+                            !users.some((user) => user._id === inquiry.assignedUser._id) && (
+                              <option value={inquiry.assignedUser._id} disabled>
+                                {inquiry.assignedUser.name || "Unavailable user"}
+                              </option>
+                            )}
+                          {users.map((user) => (
+                            <option key={user._id} value={user._id}>{user.name} · {user.userId}</option>
+                          ))}
+                        </select>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { API, adminFetch } from "../spareApi";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { API, adminFetch, portalFetch } from "../spareApi";
 import "./AdminPages.css";
 import "./QuoteRequests.css";
 
@@ -56,7 +56,7 @@ const quotationPreview = (request, discountValues) => {
   };
 };
 
-export default function QuoteRequests() {
+export default function QuoteRequests({ portal = false }) {
   const [requests, setRequests] = useState([]);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -66,24 +66,28 @@ export default function QuoteRequests() {
   const [discountDrafts, setDiscountDrafts] = useState({});
   const [quotationNotices, setQuotationNotices] = useState({});
   const [users, setUsers] = useState([]);
+  const requestFetch = portal ? portalFetch : adminFetch;
+  const requestUrl = portal ? `${API}/api/users/me/quotes` : `${API}/api/quotes`;
 
-  const loadRequests = async (signal) => {
+  const loadRequests = useCallback(async (signal) => {
     setLoading(true);
     setError("");
     try {
-      const response = await adminFetch(`${API}/api/quotes`, { signal });
+      const response = await requestFetch(requestUrl, { signal });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Unable to load quote requests.");
-      if (!Array.isArray(data)) throw new Error("The server returned invalid quote request data.");
-      setRequests(data);
+      const loadedRequests = portal ? data.quotes : data;
+      if (!Array.isArray(loadedRequests)) throw new Error("The server returned invalid quote request data.");
+      setRequests(loadedRequests);
     } catch (loadError) {
       if (loadError.name !== "AbortError") setError(loadError.message);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
-  };
+  }, [portal, requestFetch, requestUrl]);
 
-  const loadUsers = async (signal) => {
+  const loadUsers = useCallback(async (signal) => {
+    if (portal) return;
     try {
       const response = await adminFetch(`${API}/api/admin/users`, { signal });
       const data = await response.json();
@@ -93,14 +97,26 @@ export default function QuoteRequests() {
     } catch (loadError) {
       if (loadError.name !== "AbortError") setError(loadError.message);
     }
-  };
+  }, [portal]);
 
   useEffect(() => {
     const controller = new AbortController();
     loadRequests(controller.signal);
     loadUsers(controller.signal);
     return () => controller.abort();
-  }, []);
+  }, [loadRequests, loadUsers]);
+
+  useEffect(() => {
+    const refreshVisibleRequests = () => {
+      if (document.visibilityState === "visible") loadRequests();
+    };
+    const timer = window.setInterval(refreshVisibleRequests, 15000);
+    document.addEventListener("visibilitychange", refreshVisibleRequests);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshVisibleRequests);
+    };
+  }, [loadRequests]);
 
   const assignRequest = async (requestId, assignedUserId) => {
     setUpdatingId(requestId);
@@ -143,11 +159,14 @@ export default function QuoteRequests() {
     setUpdatingId(requestId);
     setError("");
     try {
-      const response = await adminFetch(`${API}/api/quotes/${requestId}/status`, {
+      const response = await requestFetch(
+        `${portal ? `${API}/api/users/me/quotes` : `${API}/api/quotes`}/${requestId}/status`,
+        {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
-      });
+        }
+      );
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Unable to update request status.");
       setRequests((current) => current.map((request) =>
@@ -193,11 +212,14 @@ export default function QuoteRequests() {
     setError("");
     setQuotationNotices((current) => ({ ...current, [request._id]: "" }));
     try {
-      const response = await adminFetch(`${API}/api/quotes/${request._id}/quotation`, {
+      const response = await requestFetch(
+        `${portal ? `${API}/api/users/me/quotes` : `${API}/api/quotes`}/${request._id}/quotation`,
+        {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ discountPercentages }),
-      });
+        }
+      );
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Unable to save the quotation.");
       setRequests((current) => current.map((item) =>
@@ -235,7 +257,9 @@ export default function QuoteRequests() {
     setUpdatingId(request._id);
     setError("");
     try {
-      const response = await adminFetch(`${API}/api/quotes/${request._id}/pdf`);
+      const response = await requestFetch(
+        `${portal ? `${API}/api/users/me/quotes` : `${API}/api/quotes`}/${request._id}/pdf`
+      );
       if (!response.ok) {
         const result = await response.json();
         throw new Error(result.message || "Unable to download the quotation PDF.");
@@ -261,8 +285,10 @@ export default function QuoteRequests() {
     <div className="admin-page quote-requests-page">
       <div className="page-title quote-requests-title">
         <div>
-          <h1>Quote requests</h1>
-          <p>Review spare-part requests and previously received machine quote requests.</p>
+          <h1>{portal ? "Quotes" : "Quote requests"}</h1>
+          <p>{portal
+            ? "View and manage quotes assigned to your account."
+            : "Review spare-part requests and previously received machine quote requests."}</p>
         </div>
         <div className="quote-request-header-actions">
           <button type="button" className="primary-btn" onClick={() => loadRequests()} disabled={loading}>
@@ -337,28 +363,30 @@ export default function QuoteRequests() {
                   <span>{[request.city, request.state].filter(Boolean).join(", ")}</span>
                 </div>
 
-                <label className="quote-status-control quote-assignment-control">
-                  <span>Assigned user</span>
-                  <select
-                    aria-label={`Assign quote for ${request.company}`}
-                    value={typeof request.assignedUser === "string"
-                      ? request.assignedUser
-                      : request.assignedUser?._id || ""}
-                    disabled={updatingId === request._id}
-                    onChange={(event) => assignRequest(request._id, event.target.value)}
-                  >
-                    <option value="">Unassigned</option>
-                    {request.assignedUser?._id &&
-                      !users.some((user) => user._id === request.assignedUser._id) && (
-                        <option value={request.assignedUser._id} disabled>
-                          {request.assignedUser.name || "Unavailable user"}
-                        </option>
-                      )}
-                    {users.map((user) => (
-                      <option key={user._id} value={user._id}>{user.name} · {user.userId}</option>
-                    ))}
-                  </select>
-                </label>
+                {!portal && (
+                  <label className="quote-status-control quote-assignment-control">
+                    <span>Assigned user</span>
+                    <select
+                      aria-label={`Assign quote for ${request.company}`}
+                      value={typeof request.assignedUser === "string"
+                        ? request.assignedUser
+                        : request.assignedUser?._id || ""}
+                      disabled={updatingId === request._id}
+                      onChange={(event) => assignRequest(request._id, event.target.value)}
+                    >
+                      <option value="">Unassigned</option>
+                      {request.assignedUser?._id &&
+                        !users.some((user) => user._id === request.assignedUser._id) && (
+                          <option value={request.assignedUser._id} disabled>
+                            {request.assignedUser.name || "Unavailable user"}
+                          </option>
+                        )}
+                      {users.map((user) => (
+                        <option key={user._id} value={user._id}>{user.name} · {user.userId}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
 
                 {request.quoteType === "machine" ? (
                   <div className="quote-request-details">
@@ -458,7 +486,7 @@ export default function QuoteRequests() {
                         disabled={updatingId === request._id || !request.quotation?.sentAt}
                         onClick={() => downloadQuotation(request)}
                       >
-                        Download admin PDF
+                        Download quotation PDF
                       </button>
                     </div>
                     {quotationNotices[request._id] && (
